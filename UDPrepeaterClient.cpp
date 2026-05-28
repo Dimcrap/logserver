@@ -19,6 +19,8 @@ int main(int argc,char * argv[]){
         std::cout<<"invalid argument count!\n"<<argv[0]<<" \'count of messages\' \n";
     }
     
+    X___  argv[1] *change to int
+    std::vector<std::string_view>messages{messagmaker(X)}
 
 }
 
@@ -35,9 +37,14 @@ int generateseed(){
 std::vector<std::string_view> messagmaker(int msgcount){
     
     std::vector<std::string_view> output;
+    char msg[64];
+
     for (int i{0};i<msgcount;i++){
         
-        LOREM_genBuffer();
+        LOREM_genBuffer(msg,64,generateseed());
+        output.emplace_back(msg);
 
     }
+
+    return output;
 };
