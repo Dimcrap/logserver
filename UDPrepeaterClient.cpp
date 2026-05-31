@@ -1,4 +1,6 @@
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <iostream>
 #include <vector>
 #include <cstring>
@@ -30,21 +32,28 @@ int main(int argc,char * argv[]){
 
     std::vector<std::string>messages {messagmaker(msgcount)};
 
-    for(std::string_view msg :messages){
-        std::cout<<msg<<std::endl;
+    int thesocket {socket(AF_INET,SOCK_DGRAM,0)};
+    if(thesocket<0){
+        std::cerr<<"could't load the socket "<<std::endl;
+        return 0;
     }
 
+    sockaddr_in server_addr;
+    server_addr.sin_family=AF_INET;
+    server_addr.sin_port=htons(8888);
+    server_addr.sin_addr.s_addr=inet_addr("127.0.0.1");    
 
+
+    //valllluuuuuuessss to send
 }
 
 
 
 int generateseed(){
-    auto seq1 =std::chrono::high_resolution_clock::now();
-    std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+    auto seq1=std::chrono::steady_clock::now();
     auto since_epoch=seq1.time_since_epoch();
 
-    return std::chrono::duration_cast<std::chrono::seconds>(since_epoch).count();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(since_epoch).count();
 }
 
 
@@ -56,9 +65,7 @@ std::vector<std::string> messagmaker(int msgcount){
 
     for (int i{0};i<msgcount;i++){
         
-        seed=generateseed();
-        std::cout<<"generated seed"<<seed<<std::endl;
-        LOREM_genBuffer(msg,64,seed);
+        LOREM_genBuffer(msg,64,generateseed());
 
         output.emplace_back(msg);
 
