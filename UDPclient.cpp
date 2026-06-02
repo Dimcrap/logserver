@@ -28,7 +28,7 @@ makeSendMsg(msgbuffer,argv,i);
 int sock=socket(AF_INET ,SOCK_DGRAM , 0);
 if(sock < 0){
     std::cerr<<"Socket creation failed \n" ;
-    return 1;
+    return 1;   
 }
 
 sockaddr_in server_addr;
@@ -40,6 +40,8 @@ char buffer[1024];
 
 sendto(sock,msgbuffer,i,0,
 (struct sockaddr *)&server_addr,sizeof(server_addr));
+
+
 
 /*
 while(true){

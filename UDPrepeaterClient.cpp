@@ -9,6 +9,7 @@
 #include <chrono>
 #include <charconv>
 #include <thread>
+#include <unistd.h>
 
 
 
@@ -43,8 +44,14 @@ int main(int argc,char * argv[]){
     server_addr.sin_port=htons(8888);
     server_addr.sin_addr.s_addr=inet_addr("127.0.0.1");    
 
+    for(std::string msg:messages){
+        sendto(thesocket,&msg,msg.size(),0,(struct sockaddr *)&server_addr,
+        sizeof(server_addr));
+        };
 
-    //valllluuuuuuessss to send
+
+    close(thesocket);
+    return 0;
 }
 
 

@@ -9,6 +9,19 @@
 
 
 
+struct logmsg{
+    std::string priority,msgbody,address;
+    int logsport;
+    char timestamp[64];
+    
+    logmsg(std::string field1="",std::string field2="",char ts[64]=nullptr,
+        std::string addr="0,0,0,0",int port=0):
+    priority(field1),msgbody(field2),address(addr),logsport(port){
+        strncpy(timestamp,ts,sizeof(timestamp)-1);
+        timestamp[sizeof(timestamp)-1]='\0';    
+    }
+};
+
 
 class logsmanager{
     public:
@@ -28,16 +41,3 @@ class logsmanager{
 
 };
 
-
-struct logmsg{
-    std::string priority,msgbody,address;
-    int logsport;
-    char timestamp[64];
-    
-    logmsg(std::string field1="",std::string field2="",char ts[64]="",
-        std::string addr="0,0,0,0",int port=0):
-    priority(field1),msgbody(field2),address(addr),logsport(port){
-        strncpy(timestamp,ts,sizeof(timestamp)-1);
-        timestamp[sizeof(timestamp)-1]='\0';    
-    }
-};
