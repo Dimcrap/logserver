@@ -22,7 +22,10 @@
    - LZ4 source repository : https://github.com/lz4/lz4
    - Public forum : https://groups.google.com/forum/#!forum/lz4c
 */
+#ifdef __cplusplus
+    extern "C"{
 
+#endif
 
 #include <stddef.h>   /* size_t */
 
@@ -44,3 +47,6 @@ void LOREM_genBuffer(void* buffer, size_t size, unsigned seed);
 size_t LOREM_genBlock(void* buffer, size_t size,
                       unsigned seed,
                       int first, int fill);
+#ifdef __cplusplus
+    }
+#endif

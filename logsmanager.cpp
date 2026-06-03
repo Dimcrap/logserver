@@ -4,6 +4,11 @@
 
 
 logsmanager::logsmanager():thpool(4){
+    files.try_emplace("INFO",std::ofstream("info.log",std::ios::app));
+    files.try_emplace("ERROR",std::ofstream("error.log",std::ios::app));
+    files.try_emplace("WARNING",std::ofstream("warning.log",std::ios::app));
+    files.try_emplace("DEBUG",std::ofstream("debug.log",std::ios::app));
+
     for(const auto &[name,file]  :files){
         if(!file.is_open()){
             std::cout<<"unable to open file "<<name<<std::endl;
@@ -38,5 +43,5 @@ void logsmanager::addlog(logmsg log){
 
 
 void logsmanager::writeTofile(logmsg log){
-    
+    files[log.priority]>>log.timestamp>>" ">>log.priority>>" ">>log.;
 }

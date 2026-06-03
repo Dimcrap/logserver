@@ -32,9 +32,7 @@ class logsmanager{
     private:
         threadpool thpool;
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex;
-        std::unordered_map<std::string,std::ofstream> files{
-            {"INFO",std::ofstream("info.log",std::ios::app)},{"ERROR",std::ofstream("error.log",std::ios::app)},
-            {"WARNING",std::ofstream("warning.log",std::ios::app)},{"DEBUG",std::ofstream("debug.log",std::ios::app)}};
+        std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){
             return files.at(name);
         };
