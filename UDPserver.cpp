@@ -5,13 +5,14 @@
 #include <ctime>
 #include <unistd.h>
 #include <cstring>
+#include <signal.h>
 #include "logsmanager.h"
 
 
 
 char * extractPriority(char * bufferObj);
 
-
+void gracefulshotdown(int sig,siginfo_t * info,void * context);
 
 int main(){
 
@@ -77,6 +78,7 @@ int main(){
 
 
 char * extractPriority(char * bufferObj){
+
     int pip{};
     int fieldLength{0};
     while(bufferObj[fieldLength]!='|'){
@@ -96,4 +98,8 @@ char * extractPriority(char * bufferObj){
     memmove(bufferObj+0,bufferObj+(fieldLength+1),(strlen(bufferObj)-(fieldLength+1)));
 
     return priority;
+};
+
+void gracefulshotdown(){
+
 };

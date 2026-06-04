@@ -21,27 +21,36 @@ void logsmanager::addlog(logmsg log){
     thpool.enqueue([this,log](){
         if(log.priority=="INFO"){
             std::lock_guard<std::mutex> lock(INFO_mutex);
+            
             files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
             ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
 
+            files.at(log.priority).flush();
+
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
+
             files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
             ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+
+            files.at(log.priority).flush();
         }else if(log.priority=="DEBUG"){
             std::lock_guard<std::mutex> lock(DEBUG_mutex);
+
             files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
             ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+
+            files.at(log.priority).flush();
         }else{
             std::lock_guard<std::mutex> lock(ERROR_mutex);
+
             files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
             ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+            
+            files.at(log.priority).flush();
         }
 
     });
 };
 
 
-void logsmanager::writeTofile(logmsg log){
-    files[log.priority]>>log.timestamp>>" ">>log.priority>>" ">>log.;
-}
