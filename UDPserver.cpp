@@ -9,14 +9,22 @@
 #include "logsmanager.h"
 
 
+bool run{true};
+
 
 char * extractPriority(char * bufferObj);
+void shutdown(int sig){
+    run=false;
+};
 
-void gracefulshotdown(int sig,siginfo_t * info,void * context);
 
 int main(){
 
+    signal(SIGINT,shutdown);
+
     logsmanager logsMng;
+
+    while(run){
 
     int sock{socket(AF_INET,SOCK_DGRAM,0)};
     if(sock<0){
@@ -34,25 +42,21 @@ int main(){
         return 0;
     }
    
-   std::cout<<"UDP log server is listenig on port : 8888 . . .\n";
+    std::cout<<"UDP log server is listenig on port : 8888 . . .\n";
    
-    
     char buffer[1024];
     sockaddr_in client_addr;
     socklen_t client_len=sizeof(client_addr);
-    
     
     while(true){
         
         int bytes=recvfrom(sock,buffer,sizeof(buffer)-1,0,
         (struct sockaddr *)& client_addr, &client_len);
         
-        
         if(bytes >0 ){
             
             buffer[bytes] = '\0';
             const char * priority = extractPriority(buffer);
-            
             
             //debuging porpuse:
             time_t now = time(nullptr);
@@ -72,6 +76,9 @@ int main(){
     }
     
     close(sock);
+    };
+
+    std::cout<<"=====closing server====="<<std::endl;
     return 0;
 
 }
@@ -100,6 +107,4 @@ char * extractPriority(char * bufferObj){
     return priority;
 };
 
-void gracefulshotdown(){
 
-};

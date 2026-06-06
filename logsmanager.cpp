@@ -4,17 +4,19 @@
 
 
 logsmanager::logsmanager():thpool(4){
-    files.try_emplace("INFO",std::ofstream("info.log",std::ios::app));
-    files.try_emplace("ERROR",std::ofstream("error.log",std::ios::app));
-    files.try_emplace("WARNING",std::ofstream("warning.log",std::ios::app));
-    files.try_emplace("DEBUG",std::ofstream("debug.log",std::ios::app));
+    files.try_emplace("INFO",std::ofstream("../logs/info.log",std::ios::app));
+    files.try_emplace("ERROR",std::ofstream("../logs/error.log",std::ios::app));
+    files.try_emplace("WARNING",std::ofstream("../logs/warning.log",std::ios::app));
+    files.try_emplace("DEBUG",std::ofstream("../logs/debug.log",std::ios::app));
 
-    for(const auto &[name,file]  :files){
+    for(const auto &[name,file] :files){
         if(!file.is_open()){
             std::cout<<"unable to open file "<<name<<std::endl;
         }
     }
+
 }
+
 
 void logsmanager::addlog(logmsg log){
     
@@ -46,7 +48,7 @@ void logsmanager::addlog(logmsg log){
 
             files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
             ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
-            
+
             files.at(log.priority).flush();
         }
 
@@ -54,3 +56,10 @@ void logsmanager::addlog(logmsg log){
 };
 
 
+logsmanager::~logsmanager(){
+
+    for(auto i = files.begin();i != files.end(); i++ ){
+        i->second.flush();
+    }
+
+};

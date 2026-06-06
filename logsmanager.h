@@ -26,6 +26,7 @@ struct logmsg{
 class logsmanager{
     public:
         logsmanager();
+        ~logsmanager();
         void addlog(logmsg log);
         void writeTofile(logmsg log);
 
@@ -36,6 +37,7 @@ class logsmanager{
         std::ofstream &getfile(const std::string &name){
             return files.at(name);
         };
+
 
 };
 
