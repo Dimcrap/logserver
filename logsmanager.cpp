@@ -60,6 +60,7 @@ logsmanager::~logsmanager(){
 
     for(auto i = files.begin();i != files.end(); i++ ){
         i->second.flush();
+        i->second.close();
     }
 
 };

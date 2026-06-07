@@ -7,14 +7,16 @@
 #include <cstring>
 #include <signal.h>
 #include "logsmanager.h"
+#include <sys/time.h>
+#include <csignal>
 
 
-bool run{true};
 
+volatile sig_atomic_t need_shutdown = 0;
 
 char * extractPriority(char * bufferObj);
 void shutdown(int sig){
-    run=false;
+    need_shutdown=1;
 };
 
 
@@ -24,14 +26,19 @@ int main(){
 
     logsmanager logsMng;
 
-    while(run){
-
     int sock{socket(AF_INET,SOCK_DGRAM,0)};
     if(sock<0){
         std::cerr<<"socket creation failed\n";
         return 1;
     }
-    
+
+    struct timeval tv;
+    tv.tv_sec=1;
+    tv.tv_usec=0;
+    setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv));
+
+   while(need_shutdown==0){
+
     sockaddr_in server_address;
     server_address.sin_family =AF_INET;
     server_address.sin_port=htons(8888);
@@ -48,17 +55,32 @@ int main(){
     sockaddr_in client_addr;
     socklen_t client_len=sizeof(client_addr);
     
-    while(true){
+    while(!need_shutdown){
         
         int bytes=recvfrom(sock,buffer,sizeof(buffer)-1,0,
         (struct sockaddr *)& client_addr, &client_len);
         
+        if(bytes<0){
+            if(errno==EAGAIN||errno ==EWOULDBLOCK)
+            {
+            continue;
+            }
+            else if(errno== EINTR)
+            {
+                std::cout<<"Interupted by signal exiting..."<<std::endl;
+            break;
+            }
+            else{
+                std::cerr<<"rcvfrom error: "<<errno<<std::endl;
+            break;
+            }
+        }
+
         if(bytes >0 ){
             
             buffer[bytes] = '\0';
             const char * priority = extractPriority(buffer);
             
-            //debuging porpuse:
             time_t now = time(nullptr);
             char timestamp[64];
             strftime(timestamp,sizeof(timestamp),"%Y-%m-%d %H-:%M:%S", localtime(&now));
@@ -73,12 +95,17 @@ int main(){
             <<buffer<<std::endl;
             delete[]  priority;
         }
+        
     }
     
     close(sock);
     };
 
     std::cout<<"=====closing server====="<<std::endl;
+    
+
+    signal(SIGINT,SIG_DFL);
+    raise(SIGINT);
     return 0;
 
 }
