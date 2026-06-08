@@ -10,12 +10,22 @@
 #include <charconv>
 #include <thread>
 #include <unistd.h>
+#include <random>
 
 
 
+
+
+
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> distribution(0,3);
 
 std::vector<std::string> messagmaker(int msgcount);
 int generateseed();
+std::vector<std::string> priorities{"ERROR|","INFO|","WARN|","DEBUG|"};
+
 
 int main(int argc,char * argv[]){
 
@@ -31,7 +41,7 @@ int main(int argc,char * argv[]){
         return 0;
     }
 
-    std::vector<std::string>messages {messagmaker(msgcount)};
+    std::vector<std::string>messages { messagmaker(msgcount) };
 
     int thesocket {socket(AF_INET,SOCK_DGRAM,0)};
     if(thesocket<0){
@@ -67,14 +77,17 @@ int generateseed(){
 std::vector<std::string> messagmaker(int msgcount){
     
     std::vector<std::string> output;
-    char msg[64];
+    std::string fulltext{""};
+    char msgbody[70];
     int seed{0};
 
     for (int i{0};i<msgcount;i++){
         
-        LOREM_genBuffer(msg,64,generateseed());
+        LOREM_genBuffer(msgbody,64,generateseed());
+        fulltext+=priorities[distribution(gen)];
+        fulltext+=msgbody;
 
-        output.emplace_back(msg);
+        output.emplace_back(fulltext);
 
     }
 
