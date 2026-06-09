@@ -27,6 +27,8 @@ int generateseed();
 std::vector<std::string> priorities{"ERROR|","INFO|","WARN|","DEBUG|"};
 
 
+
+
 int main(int argc,char * argv[]){
 
     if (argc!=2){
@@ -43,6 +45,7 @@ int main(int argc,char * argv[]){
 
     std::vector<std::string>messages { messagmaker(msgcount) };
 
+    
     int thesocket {socket(AF_INET,SOCK_DGRAM,0)};
     if(thesocket<0){
         std::cerr<<"could't load the socket "<<std::endl;
@@ -54,11 +57,12 @@ int main(int argc,char * argv[]){
     server_addr.sin_port=htons(8888);
     server_addr.sin_addr.s_addr=inet_addr("127.0.0.1");    
 
+    
     for(std::string msg:messages){
-        sendto(thesocket,&msg,msg.size(),0,(struct sockaddr *)&server_addr,
+        std::cout<<"sending message :"<<msg.c_str()<<"length of str "<<msg.size()<<std::endl;
+        sendto(thesocket,msg.c_str(),msg.size(),0,(struct sockaddr *)&server_addr,
         sizeof(server_addr));
         };
-
 
     close(thesocket);
     return 0;
@@ -84,10 +88,13 @@ std::vector<std::string> messagmaker(int msgcount){
     for (int i{0};i<msgcount;i++){
         
         LOREM_genBuffer(msgbody,64,generateseed());
+        msgbody[64]='\0';
         fulltext+=priorities[distribution(gen)];
         fulltext+=msgbody;
+        //msgbody[0]='\0';
 
         output.emplace_back(fulltext);
+        fulltext.clear();
 
     }
 

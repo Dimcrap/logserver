@@ -51,7 +51,7 @@ int main(){
    
     std::cout<<"UDP log server is listenig on port : 8888 . . .\n";
    
-    char buffer[1024];
+    char buffer[1024]={0};
     sockaddr_in client_addr;
     socklen_t client_len=sizeof(client_addr);
     
@@ -79,8 +79,10 @@ int main(){
         if(bytes >0 ){
             
             buffer[bytes] = '\0';
+            std::cout<<"full buffer"<<buffer<<"bytes:"<<bytes<<std::endl;
             const char * priority = extractPriority(buffer);
-            
+            std::cout<<"buffer after priority extarcting "<< buffer<<std::endl;
+
             time_t now = time(nullptr);
             char timestamp[64];
             strftime(timestamp,sizeof(timestamp),"%Y-%m-%d %H-:%M:%S", localtime(&now));
@@ -110,7 +112,7 @@ int main(){
 
 }
 
-
+//=======problem here - extract priority put whitespace 
 char * extractPriority(char * bufferObj){
 
     int pip{};
@@ -128,7 +130,7 @@ char * extractPriority(char * bufferObj){
 
     priority[pip]='\0';
     
-    std::cout<<"full buffer:"<<bufferObj<<std::endl;
+    //std::cout<<"full buffer:"<<bufferObj<<std::endl;
     memmove(bufferObj+0,bufferObj+(fieldLength+1),(strlen(bufferObj)-(fieldLength+1)));
 
     return priority;

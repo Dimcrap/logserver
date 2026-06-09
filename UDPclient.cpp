@@ -16,8 +16,10 @@ if(argc<3){
     return 1;
 }
 
-if(argv[1]!="ERROR" || argv[1]!="INFO" || argv[1]!="WARN" || argv[1]!="DEBUG"){
+if(std::string(argv[1])!="ERROR" && std::string(argv[1])!="INFO" &&
+ std::string(argv[1])!="WARN" && std::string(argv[1])!="DEBUG"){
     std::cout<<"onprofit priority "<<argv[1]<<std::endl;
+    return 1;
 }
 
 int i{0};

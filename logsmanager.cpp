@@ -6,7 +6,7 @@
 logsmanager::logsmanager():thpool(4){
     files.try_emplace("INFO",std::ofstream("../logs/info.log",std::ios::app));
     files.try_emplace("ERROR",std::ofstream("../logs/error.log",std::ios::app));
-    files.try_emplace("WARNING",std::ofstream("../logs/warning.log",std::ios::app));
+    files.try_emplace("WARN",std::ofstream("../logs/warning.log",std::ios::app));
     files.try_emplace("DEBUG",std::ofstream("../logs/debug.log",std::ios::app));
 
     for(const auto &[name,file] :files){
