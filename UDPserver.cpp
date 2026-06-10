@@ -105,7 +105,6 @@ int main(){
 
     std::cout<<"=====closing server====="<<std::endl;
     
-
     signal(SIGINT,SIG_DFL);
     raise(SIGINT);
     return 0;
@@ -117,12 +116,17 @@ char * extractPriority(char * bufferObj){
 
     int pip{};
     int fieldLength{0};
-    while(bufferObj[fieldLength]!='|'){
+    while(bufferObj[fieldLength]!='|' && bufferObj[fieldLength] != '\0'){
         fieldLength++;
     }
     
+        if(bufferObj[fieldLength] == '\0') {
+        // No '|' found
+        return nullptr;
+    }
+
     char * priority=new char[fieldLength+1];
-    pip=fieldLength+1;
+    pip=fieldLength;
 
     for(int i{0} ; i < fieldLength ; i++){
         priority[i]= bufferObj[i];

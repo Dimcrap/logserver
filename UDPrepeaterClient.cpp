@@ -59,7 +59,7 @@ int main(int argc,char * argv[]){
 
     
     for(std::string msg:messages){
-        std::cout<<"sending message :"<<msg.c_str()<<"length of str "<<msg.size()<<std::endl;
+        //std::cout<<"sending message :"<<msg.c_str()<<"\"length of str "<<msg.size()<<std::endl;
         sendto(thesocket,msg.c_str(),msg.size(),0,(struct sockaddr *)&server_addr,
         sizeof(server_addr));
         };
@@ -82,17 +82,36 @@ std::vector<std::string> messagmaker(int msgcount){
     
     std::vector<std::string> output;
     std::string fulltext{""};
-    char msgbody[70];
+    char msgbody[57];
     int seed{0};
 
     for (int i{0};i<msgcount;i++){
         
-        LOREM_genBuffer(msgbody,64,generateseed());
-        msgbody[64]='\0';
+        LOREM_genBuffer(msgbody,56,generateseed());
+        msgbody[56]='\0';
         fulltext+=priorities[distribution(gen)];
-        fulltext+=msgbody;
+        //fulltext+=std::string(msgbody,56);
+        //fulltext+="Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
         //msgbody[0]='\0';
+        
+        int text_end = 0;
+        for(int i = 0; i < 56; i++) {
+            if(msgbody[i] == '\0' || msgbody[i] < 32) {  // null or control char
+                break;
+            }
+            if(msgbody[i] >= 32 && msgbody[i] <= 126) {  // printable
+                text_end = i + 1;
+            }
+        }
+        std::string lorem_text(msgbody,text_end);
 
+
+        while(!lorem_text.empty()&& lorem_text.back()==' '){
+            lorem_text.pop_back();
+        }
+        std::cout<<"sending message with body:"<<lorem_text<<" with size: "<<lorem_text.length()<<std::endl;
+        fulltext+=lorem_text;
+        std::cout<<"fulltext :"<<fulltext<<"with length "<< fulltext.length()<<std::endl;
         output.emplace_back(fulltext);
         fulltext.clear();
 
