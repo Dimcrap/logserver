@@ -64,3 +64,12 @@ logsmanager::~logsmanager(){
     }
 
 };
+
+std::string definefromconfig(std::string field){
+
+};
+
+
+void logsmanager::rotate_all(){
+
+}

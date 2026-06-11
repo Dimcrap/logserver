@@ -6,7 +6,7 @@
 #include <iostream>
 #include <mutex>
 #include "threadpool.h"
-
+#include <memory>
 
 
 struct logmsg{
@@ -28,15 +28,22 @@ class logsmanager{
         logsmanager();
         ~logsmanager();
         void addlog(logmsg log);
-        void writeTofile(logmsg log);
+        void rotate_all();
 
     private:
         threadpool thpool;
-        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex;
-        std::unordered_map<std::string,std::ofstream> files;
+        
+        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,;
+        std::shared_ptr<FILE> WARN;
+        std::shared_ptr<FILE> INFO;
+        std::shared_ptr<FILE> ERROR;
+        std::shared_ptr<FILE> DEBUG;
+    
+        std::string definefromconfig(std::string field);
+        /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){
             return files.at(name);
-        };
+        };*/
 
 
 };
