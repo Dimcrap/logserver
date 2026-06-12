@@ -7,6 +7,8 @@
 #include <mutex>
 #include "threadpool.h"
 #include <memory>
+#include <stdlib.h>
+#include <stdio.h>
 
 
 struct logmsg{
@@ -21,7 +23,7 @@ struct logmsg{
         timestamp[sizeof(timestamp)-1]='\0';    
     }
 };
-
+ 
 
 class logsmanager{
     public:
@@ -35,11 +37,12 @@ class logsmanager{
         
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,;
         std::shared_ptr<FILE> WARN;
-        std::shared_ptr<FILE> INFO;
         std::shared_ptr<FILE> ERROR;
         std::shared_ptr<FILE> DEBUG;
+        std::shared_ptr<FILE> INFO;
     
-        std::string definefromconfig(std::string field);
+        char * definefromconfig(std::string field);
+        void editconfig(std::string field ,std::string value);
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){
             return files.at(name);

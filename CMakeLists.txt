@@ -12,6 +12,11 @@ set(UDP_server_resources UDPserver.cpp threadpool.cpp logsmanager.cpp)
 set(UDP_client_resources UDPclient.cpp)
 set(UDP_repeater_resources lorem.c UDPrepeaterClient.cpp )  
 
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+#cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+
 add_executable(UDPs)
 target_sources(UDPs  PRIVATE ${UDP_server_resources})
 

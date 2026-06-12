@@ -4,16 +4,12 @@
 
 
 logsmanager::logsmanager():thpool(4){
-    files.try_emplace("INFO",std::ofstream("../logs/info.log",std::ios::app));
-    files.try_emplace("ERROR",std::ofstream("../logs/error.log",std::ios::app));
-    files.try_emplace("WARN",std::ofstream("../logs/warning.log",std::ios::app));
-    files.try_emplace("DEBUG",std::ofstream("../logs/debug.log",std::ios::app));
+    WARN.reset(fopen(definefromconfig("warn_log"),"a"),[](FILE * F){if(F) fclose(F);});
+    ERROR.reset(fopen(definefromconfig("error_log"),"a"),[](FILE * F){if(F) fclose(F);});
+    DEBUG.reset(fopen(definefromconfig("debug_log"),"a"),[](FILE * F){if(F) fclose(F);});
+    INFO.reset(fopen(definefromconfig("info_log"),"a"),[](FILE * F){if(F) fclose(F);});
 
-    for(const auto &[name,file] :files){
-        if(!file.is_open()){
-            std::cout<<"unable to open file "<<name<<std::endl;
-        }
-    }
+    //check
 
 }
 
@@ -65,11 +61,35 @@ logsmanager::~logsmanager(){
 
 };
 
-std::string definefromconfig(std::string field){
+char * definefromconfig(std::string field){
+    std::ifstream source("config");
+    if(!source.is_open()){
+        std::cerr<<"failed to open config file"<<std::endl;
+        return 0;
+    }
+
+    std::string word{""};
+    std::vector<std::string> contents;
+
+    while(getline(source,word,' ')){
+        contents.push_back(word);
+    }
+    auto it=find(contents.begin(),contents.end(),field);
+    int indx{(it-contents.begin())+1}
+
+    //create a char * of contents[indx]
+    
+};
+
+void editconfig(std::string field ,std::string value){
 
 };
 
 
 void logsmanager::rotate_all(){
-
+    /*-apply mutex
+    auto deleter = sharedptrobject.getdeleter();
+    deleter(sharedptrobject.get())
+    sharedptrobject.reset(fopen(newfile),"a")
+    */
 }
