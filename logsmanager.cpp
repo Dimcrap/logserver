@@ -61,7 +61,7 @@ logsmanager::~logsmanager(){
 
 };
 
-char * definefromconfig(std::string field){
+const char * definefromconfig(std::string field){
     std::ifstream source("config");
     if(!source.is_open()){
         std::cerr<<"failed to open config file"<<std::endl;
@@ -70,18 +70,38 @@ char * definefromconfig(std::string field){
 
     std::string word{""};
     std::vector<std::string> contents;
+    
 
     while(getline(source,word,' ')){
         contents.push_back(word);
     }
-    auto it=find(contents.begin(),contents.end(),field);
-    int indx{(it-contents.begin())+1}
+    auto it=lower_bound(contents.begin(),contents.end(),field);
+    int indx{(it-contents.begin())+1};
 
-    //create a char * of contents[indx]
-    
+    const char * res= contents[indx].c_str();
+    return res;
 };
 
 void editconfig(std::string field ,std::string value){
+std::fstream sourcefile("config.txt",std::ios::in | std::ios::out);
+if(!sourcefile.is_open()){
+    std::cerr<<"error"<<std::endl;
+}else{
+    std::string line{""};
+    long pos = sourcefile.tellg();
+
+    while(std::getline(sourcefile,line)){
+        if(line.find("field")){
+            sourcefile.seekp(pos);
+            sourcefile<<field<<": "<<value;//<<std::endl;
+            //std::cout<<"configuration changed successfully"<<std::endl;
+            break;
+        }
+        pos=sourcefile.tellg();
+    }
+
+}
+
 
 };
 
