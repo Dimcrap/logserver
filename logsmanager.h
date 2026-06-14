@@ -9,6 +9,7 @@
 #include <memory>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctime>
 
 
 struct logmsg{
@@ -43,6 +44,8 @@ class logsmanager{
     
         const char * definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
+        std::string createlogname(std::string category);
+        
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){
             return files.at(name);

@@ -4,12 +4,12 @@
 
 
 logsmanager::logsmanager():thpool(4){
-    WARN.reset(fopen(definefromconfig("warn_log"),"a"),[](FILE * F){if(F) fclose(F);});
-    ERROR.reset(fopen(definefromconfig("error_log"),"a"),[](FILE * F){if(F) fclose(F);});
-    DEBUG.reset(fopen(definefromconfig("debug_log"),"a"),[](FILE * F){if(F) fclose(F);});
-    INFO.reset(fopen(definefromconfig("info_log"),"a"),[](FILE * F){if(F) fclose(F);});
 
-    //check
+    WARN.reset(fopen(definefromconfig(definefromconfig("warn_log:")),"a"),[](FILE * F){if(F) fclose(F);});
+    ERROR.reset(fopen(definefromconfig(definefromconfig("error_log:")),"a"),[](FILE * F){if(F) fclose(F);});
+    DEBUG.reset(fopen(definefromconfig(definefromconfig("debug_log:")),"a"),[](FILE * F){if(F) fclose(F);});
+    INFO.reset(fopen(definefromconfig(definefromconfig("info_log")),"a"),[](FILE * F){if(F) fclose(F);});
+
 
 }
 
@@ -54,10 +54,12 @@ void logsmanager::addlog(logmsg log){
 
 logsmanager::~logsmanager(){
 
-    for(auto i = files.begin();i != files.end(); i++ ){
-        i->second.flush();
-        i->second.close();
-    }
+    fflush(WARN.get());
+    fflush(ERROR.get());
+    fflush(DEBUG.get());
+    fflush(INFO.get());
+
+
 
 };
 
@@ -93,7 +95,7 @@ if(!sourcefile.is_open()){
     while(std::getline(sourcefile,line)){
         if(line.find("field")){
             sourcefile.seekp(pos);
-            sourcefile<<field<<": "<<value;//<<std::endl;
+            sourcefile<<field<<": "<<value<<std::endl;
             //std::cout<<"configuration changed successfully"<<std::endl;
             break;
         }
@@ -112,4 +114,21 @@ void logsmanager::rotate_all(){
     deleter(sharedptrobject.get())
     sharedptrobject.reset(fopen(newfile),"a")
     */
+   {
+       std::lock_guard warnlock(WARN_mutex);
+       WARN.reset(createlogname("warning")
+       ) 
+   }
+
 }
+
+std::string logsmanager::createlogname(std::string category){
+    std::time_t now=std::time(nullptr);
+    struct tm *t =localtime(&now);
+    char buffer[16];
+
+    strftime(buffer,sizeof(buffer),"%M-%d_%H:%M:%S",t);
+
+    return category+"_"+buffer+".txt";
+
+};
