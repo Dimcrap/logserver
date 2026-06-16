@@ -10,6 +10,7 @@ logsmanager::logsmanager():thpool(4){
     DEBUG.reset(fopen(definefromconfig(definefromconfig("debug_log:")),"a"),[](FILE * F){if(F) fclose(F);});
     INFO.reset(fopen(definefromconfig(definefromconfig("info_log")),"a"),[](FILE * F){if(F) fclose(F);});
 
+    checkFiles();
 
 }
 
@@ -19,11 +20,9 @@ void logsmanager::addlog(logmsg log){
     thpool.enqueue([this,log](){
         if(log.priority=="INFO"){
             std::lock_guard<std::mutex> lock(INFO_mutex);
-            
-            files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
-            ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+            char * log ="["+log.timestamp+"] from"+log.address+":"+log.logsport+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n";
+            fprintf(WARN.get(),"["+std::string(log.timestamp)+"] from"+log.address+":"+log.logsport+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n");
 
-            files.at(log.priority).flush();
 
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
@@ -116,10 +115,20 @@ void logsmanager::rotate_all(){
     */
    {
        std::lock_guard warnlock(WARN_mutex);
-       WARN.reset(createlogname("warning")
-       ) 
+       WARN.reset(fopen((createlogname("warning")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+   };
+   {
+       std::lock_guard warnlock(DEBUG_mutex);
+       DEBUG.reset(fopen((createlogname("debug")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+   }; 
+     {
+       std::lock_guard warnlock(ERROR_mutex);
+       ERROR.reset(fopen((createlogname("warning")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+   };   
+   {
+       std::lock_guard warnlock(INFO_mutex);
+       INFO.reset(fopen((createlogname("info")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    }
-
 }
 
 std::string logsmanager::createlogname(std::string category){
@@ -130,5 +139,18 @@ std::string logsmanager::createlogname(std::string category){
     strftime(buffer,sizeof(buffer),"%M-%d_%H:%M:%S",t);
 
     return category+"_"+buffer+".txt";
+
+};
+
+void logsmanager::checkFiles(){
+    if(!WARN.get()){
+        std::cerr<<"there is trouble with oponing warnings file "<<std::endl;
+    }else if(!DEBUG.get()){
+        std::cerr<<"there is trouble with oponing debugs file "<<std::endl;
+    }else if(!INFO.get()){
+        std::cerr<<"there is trouble with opening info file "<<std::endl;
+    }else if(!ERROR){
+        std::cerr<<"there is trouble with opening errors file "<<std::endl;
+    }
 
 };
