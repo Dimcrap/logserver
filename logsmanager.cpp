@@ -20,31 +20,27 @@ void logsmanager::addlog(logmsg log){
     thpool.enqueue([this,log](){
         if(log.priority=="INFO"){
             std::lock_guard<std::mutex> lock(INFO_mutex);
-            char * log ="["+log.timestamp+"] from"+log.address+":"+log.logsport+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n";
-            fprintf(WARN.get(),"["+std::string(log.timestamp)+"] from"+log.address+":"+log.logsport+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n");
+            fprintf(INFO.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
 
 
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
 
-            files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
-            ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+            fprintf(WARN.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
 
-            files.at(log.priority).flush();
         }else if(log.priority=="DEBUG"){
             std::lock_guard<std::mutex> lock(DEBUG_mutex);
 
-            files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
-            ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
+           fprintf(DEBUG.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
 
-            files.at(log.priority).flush();
         }else{
             std::lock_guard<std::mutex> lock(ERROR_mutex);
 
-            files.at(log.priority)<<"["<<std::string(log.timestamp)<<"] from"<<log.address<<
-            ":"<<log.logsport<<"-"<<"priority"<<log.priority<<" message"": "<<log.msgbody;
-
-            files.at(log.priority).flush();
+           fprintf(ERROR.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
         }
 
     });
@@ -57,7 +53,6 @@ logsmanager::~logsmanager(){
     fflush(ERROR.get());
     fflush(DEBUG.get());
     fflush(INFO.get());
-
 
 
 };
@@ -108,11 +103,7 @@ if(!sourcefile.is_open()){
 
 
 void logsmanager::rotate_all(){
-    /*-apply mutex
-    auto deleter = sharedptrobject.getdeleter();
-    deleter(sharedptrobject.get())
-    sharedptrobject.reset(fopen(newfile),"a")
-    */
+   
    {
        std::lock_guard warnlock(WARN_mutex);
        WARN.reset(fopen((createlogname("warning")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
@@ -153,4 +144,8 @@ void logsmanager::checkFiles(){
         std::cerr<<"there is trouble with opening errors file "<<std::endl;
     }
 
+};
+
+void logsmanager::rotationer(){
+    
 };
