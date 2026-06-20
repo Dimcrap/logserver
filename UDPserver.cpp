@@ -7,6 +7,7 @@
 #include <cstring>
 #include <signal.h>
 #include "logsmanager.h"
+#include "timer.h"
 #include <sys/time.h>
 #include <csignal>
 
@@ -15,6 +16,7 @@
 volatile sig_atomic_t need_shutdown = 0;
 
 char * extractPriority(char * bufferObj);
+
 void shutdown(int sig){
     need_shutdown=1;
 };
@@ -25,6 +27,10 @@ int main(){
     signal(SIGINT,shutdown);
 
     logsmanager logsMng;
+    timer tm;
+
+
+    //=======================================must call tm.schedule(correctarguments) just here
 
     int sock{socket(AF_INET,SOCK_DGRAM,0)};
     if(sock<0){
@@ -57,6 +63,7 @@ int main(){
     
     while(!need_shutdown){
         
+        tm.tick();
         int bytes=recvfrom(sock,buffer,sizeof(buffer)-1,0,
         (struct sockaddr *)& client_addr, &client_len);
         

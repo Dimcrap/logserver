@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctime>
+#include <atomic>
+
+
 
 
 struct logmsg{
@@ -35,6 +38,7 @@ class logsmanager{
 
     private:
         threadpool thpool;
+        std::atomic<bool> running;
         
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,;
         std::shared_ptr<FILE> WARN;
@@ -45,8 +49,7 @@ class logsmanager{
         const char * definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);
-        void checkFiles();
-        void rotationer();
+        void checkFiles();        
 
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){

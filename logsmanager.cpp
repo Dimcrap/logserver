@@ -23,7 +23,6 @@ void logsmanager::addlog(logmsg log){
             fprintf(INFO.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
 
-
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
 
@@ -42,7 +41,6 @@ void logsmanager::addlog(logmsg log){
            fprintf(ERROR.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
         }
-
     });
 };
 
@@ -54,8 +52,8 @@ logsmanager::~logsmanager(){
     fflush(DEBUG.get());
     fflush(INFO.get());
 
-
 };
+
 
 const char * definefromconfig(std::string field){
     std::ifstream source("config");
@@ -78,6 +76,7 @@ const char * definefromconfig(std::string field){
     return res;
 };
 
+
 void editconfig(std::string field ,std::string value){
 std::fstream sourcefile("config.txt",std::ios::in | std::ios::out);
 if(!sourcefile.is_open()){
@@ -98,29 +97,37 @@ if(!sourcefile.is_open()){
 
 }
 
-
 };
 
 
 void logsmanager::rotate_all(){
    
    {
-       std::lock_guard warnlock(WARN_mutex);
-       WARN.reset(fopen((createlogname("warning")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+       std::lock_guard lock(WARN_mutex);
+       std::string newfilename{createlogname("warn")};
+       editconfig("warn_log:",newfilename);
+       WARN.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    };
    {
-       std::lock_guard warnlock(DEBUG_mutex);
-       DEBUG.reset(fopen((createlogname("debug")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+       std::lock_guard lock(DEBUG_mutex);
+             std::string newfilename{createlogname("debug")};
+       editconfig("debug_log:",newfilename);
+       DEBUG.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    }; 
      {
-       std::lock_guard warnlock(ERROR_mutex);
-       ERROR.reset(fopen((createlogname("warning")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+       std::lock_guard lock(ERROR_mutex);
+       std::string newfilename{createlogname("error")};
+       editconfig("error_log:",newfilename);
+       ERROR.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    };   
    {
-       std::lock_guard warnlock(INFO_mutex);
-       INFO.reset(fopen((createlogname("info")).c_str(),"a"),[](FILE * f){if(f) fclose(f);});
+       std::lock_guard lock(INFO_mutex);
+       std::string newfilename{createlogname("info")};
+       editconfig("info_log:",newfilename);
+       INFO.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    }
 }
+
 
 std::string logsmanager::createlogname(std::string category){
     std::time_t now=std::time(nullptr);
@@ -133,6 +140,7 @@ std::string logsmanager::createlogname(std::string category){
 
 };
 
+
 void logsmanager::checkFiles(){
     if(!WARN.get()){
         std::cerr<<"there is trouble with oponing warnings file "<<std::endl;
@@ -144,8 +152,4 @@ void logsmanager::checkFiles(){
         std::cerr<<"there is trouble with opening errors file "<<std::endl;
     }
 
-};
-
-void logsmanager::rotationer(){
-    
 };
