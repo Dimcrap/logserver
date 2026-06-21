@@ -49,7 +49,8 @@ class logsmanager{
         const char * definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);
-        void checkFiles();        
+        void checkFiles();     
+        std::chrono::seconds getinterval();  
 
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){

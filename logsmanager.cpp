@@ -153,3 +153,19 @@ void logsmanager::checkFiles(){
     }
 
 };
+
+
+std::chrono::seconds logsmanager::getinterval(){
+
+std::string format{definefromconfig("rotate_clock:")};
+
+
+if(format=="minute"){
+    return std::chrono::minutes( std::stoi( definefromconfig("rotate_count:")));
+}else if(format=="hour"){
+    return std::chrono::hours(std::stoi( definefromconfig("rotate_count:")));
+}else{
+    return std::chrono::seconds(std::stoi( definefromconfig("rotate_count:")));
+}
+
+};   
