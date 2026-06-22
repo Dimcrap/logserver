@@ -35,12 +35,14 @@ class logsmanager{
         ~logsmanager();
         void addlog(logmsg log);
         void rotate_all();
+        std::chrono::seconds getinterval();  
+
 
     private:
         threadpool thpool;
         std::atomic<bool> running;
         
-        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,;
+        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex;
         std::shared_ptr<FILE> WARN;
         std::shared_ptr<FILE> ERROR;
         std::shared_ptr<FILE> DEBUG;
@@ -50,7 +52,6 @@ class logsmanager{
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);
         void checkFiles();     
-        std::chrono::seconds getinterval();  
 
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){

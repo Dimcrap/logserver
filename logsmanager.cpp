@@ -21,7 +21,8 @@ void logsmanager::addlog(logmsg log){
         if(log.priority=="INFO"){
             std::lock_guard<std::mutex> lock(INFO_mutex);
             fprintf(INFO.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
-            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
+            log.msgbody+"\n").c_str());
 
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
@@ -39,7 +40,8 @@ void logsmanager::addlog(logmsg log){
             std::lock_guard<std::mutex> lock(ERROR_mutex);
 
            fprintf(ERROR.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
-            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
+            log.msgbody+"\n").c_str());
         }
     });
 };

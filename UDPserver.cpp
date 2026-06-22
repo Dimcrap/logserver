@@ -29,8 +29,7 @@ int main(){
     logsmanager logsMng;
     timer tm;
 
-
-    //=======================================must call tm.schedule(correctarguments) just here
+    tm.schedule([&logsMng](){logsMng.rotate_all();},logsMng.getinterval());
 
     int sock{socket(AF_INET,SOCK_DGRAM,0)};
     if(sock<0){
@@ -118,7 +117,6 @@ int main(){
 
 }
 
-//=======problem here - extract priority put whitespace 
 char * extractPriority(char * bufferObj){
 
     int pip{};
