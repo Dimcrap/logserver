@@ -5,10 +5,10 @@
 
 logsmanager::logsmanager():thpool(4){
 
-    WARN.reset(fopen(definefromconfig(definefromconfig("warn_log:")),"a"),[](FILE * F){if(F) fclose(F);});
-    ERROR.reset(fopen(definefromconfig(definefromconfig("error_log:")),"a"),[](FILE * F){if(F) fclose(F);});
-    DEBUG.reset(fopen(definefromconfig(definefromconfig("debug_log:")),"a"),[](FILE * F){if(F) fclose(F);});
-    INFO.reset(fopen(definefromconfig(definefromconfig("info_log")),"a"),[](FILE * F){if(F) fclose(F);});
+    WARN.reset(fopen(definefromconfig("warn_log:"),"a"),[](FILE * F){if(F) fclose(F);});
+    ERROR.reset(fopen(definefromconfig("error_log:"),"a"),[](FILE * F){if(F) fclose(F);});
+    DEBUG.reset(fopen(definefromconfig("debug_log:"),"a"),[](FILE * F){if(F) fclose(F);});
+    INFO.reset(fopen(definefromconfig("info_log"),"a"),[](FILE * F){if(F) fclose(F);});
 
     checkFiles();
 
@@ -19,29 +19,40 @@ void logsmanager::addlog(logmsg log){
     
     thpool.enqueue([this,log](){
         if(log.priority=="INFO"){
-            std::lock_guard<std::mutex> lock(INFO_mutex);
-            fprintf(INFO.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
-            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
-            log.msgbody+"\n").c_str());
 
+            std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
+            log.msgbody+"\n"};
+
+            std::lock_guard<std::mutex> lock(INFO_mutex);
+            fputs(fullmsg.c_str(),INFO.get());
+        
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
 
-            fprintf(WARN.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
-            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
+            std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
+            log.msgbody+"\n"};
+
+            fputs(fullmsg.c_str(),WARN.get());
 
         }else if(log.priority=="DEBUG"){
             std::lock_guard<std::mutex> lock(DEBUG_mutex);
 
-           fprintf(DEBUG.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
-            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+log.msgbody+"\n").c_str());
+             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
+            log.msgbody+"\n"};
+
+            fputs(fullmsg.c_str(),DEBUG.get());
 
         }else{
             std::lock_guard<std::mutex> lock(ERROR_mutex);
 
-           fprintf(ERROR.get(),("["+std::string(log.timestamp)+"] from"+log.address+":"+
+             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
-            log.msgbody+"\n").c_str());
+            log.msgbody+"\n"};
+
+            fputs(fullmsg.c_str(),ERROR.get());
         }
     });
 };
@@ -57,7 +68,7 @@ logsmanager::~logsmanager(){
 };
 
 
-const char * definefromconfig(std::string field){
+const char * logsmanager::definefromconfig(std::string field){
     std::ifstream source("config");
     if(!source.is_open()){
         std::cerr<<"failed to open config file"<<std::endl;
@@ -72,14 +83,14 @@ const char * definefromconfig(std::string field){
         contents.push_back(word);
     }
     auto it=lower_bound(contents.begin(),contents.end(),field);
-    int indx{(it-contents.begin())+1};
+    long int indx{(it-contents.begin())+1};
 
     const char * res= contents[indx].c_str();
     return res;
 };
 
 
-void editconfig(std::string field ,std::string value){
+void logsmanager::editconfig(std::string field ,std::string value){
 std::fstream sourcefile("config.txt",std::ios::in | std::ios::out);
 if(!sourcefile.is_open()){
     std::cerr<<"error"<<std::endl;
