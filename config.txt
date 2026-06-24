@@ -5,5 +5,5 @@ info_log: logs/info.log
 
 
 rotate_clock: minute
-rotate_count: 10
+rotate_count: 1
 

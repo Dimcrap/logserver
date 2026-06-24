@@ -1,17 +1,18 @@
 #include "logsmanager.h"
 
-
+//commit debuging path mentioning problem"
 
 
 logsmanager::logsmanager():thpool(4){
 
+    /*const char * output = definefromconfig("warn_log:");
+    std::cout<<"definefrom config executed"<<std::endl;
     WARN.reset(fopen(definefromconfig("warn_log:"),"a"),[](FILE * F){if(F) fclose(F);});
     ERROR.reset(fopen(definefromconfig("error_log:"),"a"),[](FILE * F){if(F) fclose(F);});
     DEBUG.reset(fopen(definefromconfig("debug_log:"),"a"),[](FILE * F){if(F) fclose(F);});
-    INFO.reset(fopen(definefromconfig("info_log"),"a"),[](FILE * F){if(F) fclose(F);});
-
-    checkFiles();
-
+    INFO.reset(fopen(definefromconfig("info_log:"),"a"),[](FILE * F){if(F) fclose(F);});
+*/
+   // checkFiles();
 }
 
 
@@ -69,7 +70,7 @@ logsmanager::~logsmanager(){
 
 
 const char * logsmanager::definefromconfig(std::string field){
-    std::ifstream source("config");
+    std::ifstream source("../config.txt");
     if(!source.is_open()){
         std::cerr<<"failed to open config file"<<std::endl;
         return 0;
@@ -77,7 +78,6 @@ const char * logsmanager::definefromconfig(std::string field){
 
     std::string word{""};
     std::vector<std::string> contents;
-    
 
     while(getline(source,word,' ')){
         contents.push_back(word);
@@ -85,8 +85,11 @@ const char * logsmanager::definefromconfig(std::string field){
     auto it=lower_bound(contents.begin(),contents.end(),field);
     long int indx{(it-contents.begin())+1};
 
-    const char * res= contents[indx].c_str();
-    return res;
+    std::string temp="../logs/"+contents[indx];
+    
+    const char * final=temp.c_str();
+
+    return final;
 };
 
 
@@ -171,7 +174,6 @@ void logsmanager::checkFiles(){
 std::chrono::seconds logsmanager::getinterval(){
 
 std::string format{definefromconfig("rotate_clock:")};
-
 
 if(format=="minute"){
     return std::chrono::minutes( std::stoi( definefromconfig("rotate_count:")));
