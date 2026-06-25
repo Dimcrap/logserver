@@ -1,18 +1,18 @@
 #include "logsmanager.h"
+#include <algorithm>
 
-//commit debuging path mentioning problem"
 
+// chaning extracting data from config file method
 
 logsmanager::logsmanager():thpool(4){
 
-    /*const char * output = definefromconfig("warn_log:");
-    std::cout<<"definefrom config executed"<<std::endl;
+    std::cout<<"calling reset on pointers"<<std::endl;
     WARN.reset(fopen(definefromconfig("warn_log:"),"a"),[](FILE * F){if(F) fclose(F);});
     ERROR.reset(fopen(definefromconfig("error_log:"),"a"),[](FILE * F){if(F) fclose(F);});
     DEBUG.reset(fopen(definefromconfig("debug_log:"),"a"),[](FILE * F){if(F) fclose(F);});
     INFO.reset(fopen(definefromconfig("info_log:"),"a"),[](FILE * F){if(F) fclose(F);});
-*/
-   // checkFiles();
+
+    checkFiles();
 }
 
 
@@ -76,19 +76,34 @@ const char * logsmanager::definefromconfig(std::string field){
         return 0;
     }
 
+    
     std::string word{""};
     std::vector<std::string> contents;
 
     while(getline(source,word,' ')){
         contents.push_back(word);
     }
-    auto it=lower_bound(contents.begin(),contents.end(),field);
-    long int indx{(it-contents.begin())+1};
+    
+    auto comp=[field](std::string element){
+        return field==element;
+    };
 
-    std::string temp="../logs/"+contents[indx];
+    auto it=find_if(contents.begin(),contents.end(),comp);
+    long int indx{it-contents.begin()};
+    
+    //need not sound error
+    std::cout<<"finding "<<field<<" in items:"<<std::endl;
+    for(std::string str:contents){
+        std::cout<<str<<std::endl;
+    }
+    std::cout<<"founded index"<<indx<<std::endl;
+
+    std::string temp="../"+contents[indx];
+    
+    //std::cout<<"path creating is fine :"<<temp<<std::endl;
     
     const char * final=temp.c_str();
-
+    
     return final;
 };
 
@@ -184,3 +199,4 @@ if(format=="minute"){
 }
 
 };   
+
