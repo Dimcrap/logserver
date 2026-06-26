@@ -13,6 +13,7 @@ logsmanager::logsmanager():thpool(4){
     INFO.reset(fopen(definefromconfig("info_log:"),"a"),[](FILE * F){if(F) fclose(F);});
 
     checkFiles();
+    
 }
 
 
@@ -80,7 +81,7 @@ const char * logsmanager::definefromconfig(std::string field){
     std::string word{""};
     std::vector<std::string> contents;
 
-    while(getline(source,word,' ')){
+    while( source>>word ){
         contents.push_back(word);
     }
     
@@ -89,19 +90,17 @@ const char * logsmanager::definefromconfig(std::string field){
     };
 
     auto it=find_if(contents.begin(),contents.end(),comp);
-    long int indx{it-contents.begin()};
+    long int indx{(it-contents.begin())+1};
     
-    //need not sound error
-    std::cout<<"finding "<<field<<" in items:"<<std::endl;
+    //need not found error
+    /*std::cout<<"finding "<<field<<" in items:"<<std::endl;
     for(std::string str:contents){
-        std::cout<<str<<std::endl;
-    }
-    std::cout<<"founded index"<<indx<<std::endl;
+        std::cout<<str<<"|space|";
+    }*/
+    //std::cout<<"founded index"<<indx<<std::endl;
 
     std::string temp="../"+contents[indx];
-    
-    //std::cout<<"path creating is fine :"<<temp<<std::endl;
-    
+        
     const char * final=temp.c_str();
     
     return final;
@@ -182,7 +181,7 @@ void logsmanager::checkFiles(){
     }else if(!ERROR){
         std::cerr<<"there is trouble with opening errors file "<<std::endl;
     }
-
+    
 };
 
 
