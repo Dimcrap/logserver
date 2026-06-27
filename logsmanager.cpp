@@ -2,7 +2,7 @@
 #include <algorithm>
 
 
-// chaning extracting data from config file method
+// debugin path format issues for time rotation schadule
 
 logsmanager::logsmanager():thpool(4){
 
@@ -76,7 +76,6 @@ const char * logsmanager::definefromconfig(std::string field){
         std::cerr<<"failed to open config file"<<std::endl;
         return 0;
     }
-
     
     std::string word{""};
     std::vector<std::string> contents;
@@ -98,12 +97,13 @@ const char * logsmanager::definefromconfig(std::string field){
         std::cout<<str<<"|space|";
     }*/
     //std::cout<<"founded index"<<indx<<std::endl;
-
-    std::string temp="../"+contents[indx];
-        
-    const char * final=temp.c_str();
     
-    return final;
+    if(field=="rotate_clock:"){
+        return contents[indx].c_str();
+    }
+    
+    std::string temp{"../"+contents[indx]};
+    return temp.c_str();
 };
 
 
@@ -178,7 +178,7 @@ void logsmanager::checkFiles(){
         std::cerr<<"there is trouble with oponing debugs file "<<std::endl;
     }else if(!INFO.get()){
         std::cerr<<"there is trouble with opening info file "<<std::endl;
-    }else if(!ERROR){
+    }else if(!ERROR.get()){
         std::cerr<<"there is trouble with opening errors file "<<std::endl;
     }
     
@@ -188,12 +188,12 @@ void logsmanager::checkFiles(){
 std::chrono::seconds logsmanager::getinterval(){
 
 std::string format{definefromconfig("rotate_clock:")};
-
 if(format=="minute"){
     return std::chrono::minutes( std::stoi( definefromconfig("rotate_count:")));
 }else if(format=="hour"){
     return std::chrono::hours(std::stoi( definefromconfig("rotate_count:")));
 }else{
+    std::cout<<"doing the job"<<std::endl;
     return std::chrono::seconds(std::stoi( definefromconfig("rotate_count:")));
 }
 

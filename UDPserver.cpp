@@ -28,9 +28,9 @@ int main(){
 
     logsmanager logsMng;
     timer tm;
-
+    
     tm.schedule([&logsMng](){logsMng.rotate_all();},logsMng.getinterval());
-
+    
     int sock{socket(AF_INET,SOCK_DGRAM,0)};
     if(sock<0){
         std::cerr<<"socket creation failed\n";
