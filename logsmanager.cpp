@@ -98,7 +98,7 @@ const char * logsmanager::definefromconfig(std::string field){
     }*/
     //std::cout<<"founded index"<<indx<<std::endl;
     
-    if(field=="rotate_clock:"){
+    if(field=="rotate_clock:" || field=="rotate_count:"){
         return contents[indx].c_str();
     }
     
@@ -108,15 +108,17 @@ const char * logsmanager::definefromconfig(std::string field){
 
 
 void logsmanager::editconfig(std::string field ,std::string value){
-std::fstream sourcefile("config.txt",std::ios::in | std::ios::out);
+
+std::fstream sourcefile("../config.txt",std::ios::in | std::ios::out);
 if(!sourcefile.is_open()){
-    std::cerr<<"error"<<std::endl;
+    std::cerr<<"failed to open config file"<<std::endl;
 }else{
+    //===================================wrong editing
     std::string line{""};
     long pos = sourcefile.tellg();
 
     while(std::getline(sourcefile,line)){
-        if(line.find("field")){
+        if(line.find(field)){
             sourcefile.seekp(pos);
             sourcefile<<field<<": "<<value<<std::endl;
             //std::cout<<"configuration changed successfully"<<std::endl;
@@ -134,25 +136,25 @@ void logsmanager::rotate_all(){
    
    {
        std::lock_guard lock(WARN_mutex);
-       std::string newfilename{createlogname("warn")};
+       std::string newfilename{"../logs/"+createlogname("warn")};
        editconfig("warn_log:",newfilename);
        WARN.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    };
    {
        std::lock_guard lock(DEBUG_mutex);
-             std::string newfilename{createlogname("debug")};
+             std::string newfilename{"../logs/"+createlogname("debug")};
        editconfig("debug_log:",newfilename);
        DEBUG.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    }; 
      {
        std::lock_guard lock(ERROR_mutex);
-       std::string newfilename{createlogname("error")};
+       std::string newfilename{"../logs/"+createlogname("error")};
        editconfig("error_log:",newfilename);
        ERROR.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    };   
    {
        std::lock_guard lock(INFO_mutex);
-       std::string newfilename{createlogname("info")};
+       std::string newfilename{"../logs/"+createlogname("info")};
        editconfig("info_log:",newfilename);
        INFO.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    }
@@ -166,7 +168,7 @@ std::string logsmanager::createlogname(std::string category){
 
     strftime(buffer,sizeof(buffer),"%M-%d_%H:%M:%S",t);
 
-    return category+"_"+buffer+".txt";
+    return category+"_"+buffer+".log";
 
 };
 
@@ -186,14 +188,15 @@ void logsmanager::checkFiles(){
 
 
 std::chrono::seconds logsmanager::getinterval(){
+    std::string format{definefromconfig("rotate_clock:")};
 
-std::string format{definefromconfig("rotate_clock:")};
 if(format=="minute"){
+    
     return std::chrono::minutes( std::stoi( definefromconfig("rotate_count:")));
 }else if(format=="hour"){
     return std::chrono::hours(std::stoi( definefromconfig("rotate_count:")));
 }else{
-    std::cout<<"doing the job"<<std::endl;
+    std::cout<<"get interval is exectuing inside else condition"<<std::endl;
     return std::chrono::seconds(std::stoi( definefromconfig("rotate_count:")));
 }
 
