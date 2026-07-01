@@ -1,5 +1,9 @@
 #include "logsmanager.h"
 #include <algorithm>
+#include <cstddef>
+#include <fstream>
+#include <mutex>
+#include <sstream>
 
 
 // debugin path format issues for time rotation schadule
@@ -7,10 +11,10 @@
 logsmanager::logsmanager():thpool(4){
 
     std::cout<<"calling reset on pointers"<<std::endl;
-    WARN.reset(fopen(definefromconfig("warn_log:"),"a"),[](FILE * F){if(F) fclose(F);});
-    ERROR.reset(fopen(definefromconfig("error_log:"),"a"),[](FILE * F){if(F) fclose(F);});
-    DEBUG.reset(fopen(definefromconfig("debug_log:"),"a"),[](FILE * F){if(F) fclose(F);});
-    INFO.reset(fopen(definefromconfig("info_log:"),"a"),[](FILE * F){if(F) fclose(F);});
+    WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
+    ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
+    DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
+    INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
 
     checkFiles();
     
@@ -70,7 +74,7 @@ logsmanager::~logsmanager(){
 };
 
 
-const char * logsmanager::definefromconfig(std::string field){
+std::string  logsmanager::definefromconfig(std::string field){
     std::ifstream source("../config.txt");
     if(!source.is_open()){
         std::cerr<<"failed to open config file"<<std::endl;
@@ -91,42 +95,41 @@ const char * logsmanager::definefromconfig(std::string field){
     auto it=find_if(contents.begin(),contents.end(),comp);
     long int indx{(it-contents.begin())+1};
     
-    //need not found error
-    /*std::cout<<"finding "<<field<<" in items:"<<std::endl;
-    for(std::string str:contents){
-        std::cout<<str<<"|space|";
-    }*/
-    //std::cout<<"founded index"<<indx<<std::endl;
     
     if(field=="rotate_clock:" || field=="rotate_count:"){
-        return contents[indx].c_str();
+        return contents[indx];
     }
     
-    std::string temp{"../"+contents[indx]};
-    return temp.c_str();
+    const std::string temp{"../"+contents[indx]};
+    return temp;
 };
 
 
 void logsmanager::editconfig(std::string field ,std::string value){
+std::lock_guard lock(cfgfilemutex);
+std::ifstream sourcefile("../config.txt");
 
-std::fstream sourcefile("../config.txt",std::ios::in | std::ios::out);
 if(!sourcefile.is_open()){
     std::cerr<<"failed to open config file"<<std::endl;
 }else{
-    //===================================wrong editing
-    std::string line{""};
-    long pos = sourcefile.tellg();
+    
+   std::stringstream buffer{};
+   buffer<<sourcefile.rdbuf();
+   std::string content{buffer.str()};
 
-    while(std::getline(sourcefile,line)){
-        if(line.find(field)){
-            sourcefile.seekp(pos);
-            sourcefile<<field<<": "<<value<<std::endl;
-            //std::cout<<"configuration changed successfully"<<std::endl;
-            break;
+   size_t start{content.find(field)+field.length()+1},end;
+        if(start !=std::string::npos){
+            end=(content.find_first_of("\n\v\t\r\f", start))-1;
+            if(end!=std::string::npos){
+                content.replace(start, end-start, value);
+                std::ofstream outfile("../config.txt");
+                outfile<<content;
+                 }else{
+                    std::cerr<<"undefined value for field in line\n";
+                }
+        }else{
+            std::cerr<<"undefined field value part \n";
         }
-        pos=sourcefile.tellg();
-    }
-
 }
 
 };

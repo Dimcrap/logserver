@@ -35,3 +35,4 @@ add_compile_options(
     -fmax-errors=3
 )
 add_compile_options(-Wall -Wextra -Wpedantic)
+#  build with cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..

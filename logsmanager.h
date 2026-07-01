@@ -2,7 +2,6 @@
 #include <chrono>
 #include <fstream>
 #include <cstring>
-#include <unordered_map>
 #include <iostream>
 #include <mutex>
 #include "threadpool.h"
@@ -43,13 +42,13 @@ class logsmanager{
         threadpool thpool;
         std::atomic<bool> running;
         
-        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex;
+        std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;
         std::shared_ptr<FILE> ERROR;
         std::shared_ptr<FILE> DEBUG;
         std::shared_ptr<FILE> INFO;
     
-        const char * definefromconfig(std::string field);
+        std::string definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);
         void checkFiles();     
