@@ -50,7 +50,6 @@ void threadpool::enqueue(std::function<void()> task){
     {
         std::lock_guard thelock(queue_mutex);
         tasks.emplace(std::move(task));
-        
     }
 
     my_cv.notify_one();

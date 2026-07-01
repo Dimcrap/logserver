@@ -16,8 +16,10 @@ if(argc<3){
     return 1;
 }
 
-if(argv[1]!="ERROR" || argv[1]!="INFO" || argv[1]!="WARN" || argv[1]!="DEBUG"){
+if(std::string(argv[1])!="ERROR" && std::string(argv[1])!="INFO" &&
+ std::string(argv[1])!="WARN" && std::string(argv[1])!="DEBUG"){
     std::cout<<"onprofit priority "<<argv[1]<<std::endl;
+    return 1;
 }
 
 int i{0};
@@ -28,7 +30,7 @@ makeSendMsg(msgbuffer,argv,i);
 int sock=socket(AF_INET ,SOCK_DGRAM , 0);
 if(sock < 0){
     std::cerr<<"Socket creation failed \n" ;
-    return 1;
+    return 1;   
 }
 
 sockaddr_in server_addr;
@@ -36,10 +38,11 @@ server_addr.sin_family=AF_INET;
 server_addr.sin_port= htons(8888);
 server_addr.sin_addr.s_addr=inet_addr("127.0.0.1");
 
-char buffer[1024];
 
 sendto(sock,msgbuffer,i,0,
 (struct sockaddr *)&server_addr,sizeof(server_addr));
+
+
 
 /*
 while(true){

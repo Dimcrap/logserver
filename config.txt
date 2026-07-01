@@ -1,0 +1,6 @@
+warn_log: logs/warning.log
+error_log: logs/error.log
+debug_log: logs/debug.log
+info_log: logs/info.log
+rotate_clock: minute
+rotate_count: 1
