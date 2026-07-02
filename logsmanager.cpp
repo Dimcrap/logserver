@@ -4,18 +4,24 @@
 #include <fstream>
 #include <mutex>
 #include <sstream>
+#include <sys/stat.h>
 
-
-// debugin path format issues for time rotation schadule
 
 logsmanager::logsmanager():thpool(4){
 
-    std::cout<<"calling reset on pointers"<<std::endl;
+    struct stat sb;
+
+    if(stat("../logs",&sb)!=0){
+        if(mkdir("../logs",0700)!=0){
+            std::cerr<<"there where no logs folder == logs folder creation failed\n";
+        }
+    }
+    
+    
     WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
-
     checkFiles();
     
 }
@@ -24,13 +30,16 @@ logsmanager::logsmanager():thpool(4){
 void logsmanager::addlog(logmsg log){
     
     thpool.enqueue([this,log](){
+        
         if(log.priority=="INFO"){
 
             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
             log.msgbody+"\n"};
 
+                std::cout<<"full message is  created"<<std::endl;
             std::lock_guard<std::mutex> lock(INFO_mutex);
+            
             fputs(fullmsg.c_str(),INFO.get());
         
         }else if(log.priority=="WARN"){
@@ -70,7 +79,7 @@ logsmanager::~logsmanager(){
     fflush(ERROR.get());
     fflush(DEBUG.get());
     fflush(INFO.get());
-
+    
 };
 
 
@@ -87,21 +96,25 @@ std::string  logsmanager::definefromconfig(std::string field){
     while( source>>word ){
         contents.push_back(word);
     }
-    
+   
     auto comp=[field](std::string element){
         return field==element;
     };
 
     auto it=find_if(contents.begin(),contents.end(),comp);
+    if(it==contents.end()) std::cerr<<"failed to define from configfile\n";
+    
     long int indx{(it-contents.begin())+1};
+    std::cout<<"result for "<<field<<" in definefromconfig:"<<contents[indx]<<std::endl;
     
     
-    if(field=="rotate_clock:" || field=="rotate_count:"){
+    /*if(field=="rotate_clock:" || field=="rotate_count:"){
         return contents[indx];
     }
     
     const std::string temp{"../"+contents[indx]};
-    return temp;
+    return temp;*/
+    return contents[indx];
 };
 
 
@@ -119,8 +132,9 @@ if(!sourcefile.is_open()){
 
    size_t start{content.find(field)+field.length()+1},end;
         if(start !=std::string::npos){
-            end=(content.find_first_of("\n\v\t\r\f", start))-1;
+            end=(content.find_first_of("\n\v\t\r\f", start));
             if(end!=std::string::npos){
+                std::cout<<"replacing text:"<<value<<std::endl;
                 content.replace(start, end-start, value);
                 std::ofstream outfile("../config.txt");
                 outfile<<content;
@@ -140,6 +154,7 @@ void logsmanager::rotate_all(){
    {
        std::lock_guard lock(WARN_mutex);
        std::string newfilename{"../logs/"+createlogname("warn")};
+       std::cout<<"creating new file name:"<<newfilename<<std::endl;
        editconfig("warn_log:",newfilename);
        WARN.reset(fopen(newfilename.c_str(),"a"),[](FILE * f){if(f) fclose(f);});
    };
@@ -204,4 +219,3 @@ if(format=="minute"){
 }
 
 };   
-
