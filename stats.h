@@ -6,13 +6,13 @@
 class stats{
     std::atomic<uint64_t> messagesrecieved{0};
     std::atomic<uint64_t> messagewritten{0};
-    std::atomic<uint64_t> messagedropprf{};
-    //queue_high_water_mark
+    std::atomic<uint64_t> messagedroppred{0};
+    std::atomic<uint64_t>queue_high_water_mark{0};
     //errors_encountred 
-    std::array<std::atomic<uint64_t>,4> piority_count;  
+    std::array<std::atomic<uint64_t>,4> priority_count;  
     public:
-    void increament_recieved();
-    void increament_written(const std::string & priority);
-    void increament_dropped();
+    void increase_recieved();
+    void increase_written(const std::string & priority);
+    void increase_dropped();
     void update_queue_size(size_t current);
 };
