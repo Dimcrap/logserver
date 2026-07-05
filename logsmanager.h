@@ -11,6 +11,8 @@
 #include <ctime>
 #include <atomic>
 #include <sstream>
+#include <sys/stat.h>
+#include "stats.h"
 
 
 
@@ -36,7 +38,7 @@ class logsmanager{
         void addlog(logmsg log);
         void rotate_all();
         std::chrono::seconds getinterval();  
-
+        stats statsmanager;
 
     private:
         threadpool thpool;

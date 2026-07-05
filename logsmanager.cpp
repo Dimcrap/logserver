@@ -23,12 +23,16 @@ logsmanager::logsmanager():thpool(4){
     DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
+
+    thpool.dequeuedaction=[this](){    statsmanager.update_queue_size(thpool.getqueuecount());
+};
     
 }
 
 
 void logsmanager::addlog(logmsg log){
-    
+    statsmanager.increase_recieved();
+
     thpool.enqueue([this,log](){
         
         if(log.priority=="INFO"){
@@ -69,7 +73,10 @@ void logsmanager::addlog(logmsg log){
 
             fputs(fullmsg.c_str(),ERROR.get());
         }
+        
+        statsmanager.increase_written(log.priority);
     });
+    statsmanager.update_queue_size(thpool.getqueuecount());
 };
 
 
@@ -180,8 +187,8 @@ void logsmanager::rotate_all(){
 
 
 std::string logsmanager::createlogname(std::string category){
-    std::time_t now=std::time(nullptr);
-    struct tm *t =localtime(&now);
+    std::time_t now= std::time(nullptr);
+    struct tm *t = localtime(&now);
     char buffer[16];
 
     strftime(buffer,sizeof(buffer),"%M-%d_%H:%M:%S",t);

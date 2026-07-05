@@ -26,6 +26,9 @@ threadpool::threadpool(size_t thread_num){
 
                     if(task){
                        task(); 
+
+                       if(dequeuedaction)dequeuedaction();
+                       
                     }
 
                 }

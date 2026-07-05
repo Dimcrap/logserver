@@ -1,9 +1,11 @@
+#include <cstddef>
 #include <queue>
 #include <thread>
 #include <functional>
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+
 
 
 
@@ -18,9 +20,11 @@ class threadpool{
 
 
     public:
+
         threadpool(size_t thread_num =std::thread::hardware_concurrency());
         ~threadpool();
         void enqueue(std::function<void()> task);
-
+        size_t getqueuecount(){return tasks.size();};
+        std::function<void()> dequeuedaction;
 
 };
