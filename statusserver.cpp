@@ -1,0 +1,24 @@
+#include "statusserver.h"
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+
+int statusserver::startserver(){
+    http_socket=socket(AF_INET, SOCK_STREAM, 0);
+    if(http_socket<0){
+        std::cerr<<"failed to build socket for server \n";
+        return 0;
+    }
+    sockaddr_in addr{};
+    addr.sin_family=AF_INET;
+    addr.sin_port =htons(8889);
+    addr.sin_addr.s_addr =INADDR_ANY;
+
+    if(bind(http_socket,(sockaddr *)&addr,sizeof(addr))<0){
+        std::cout<<"could not bind the socket with  socket address \n";
+        return 0;
+    };
+    listen(http_socket, 5);
+
+    return 1;
+};
