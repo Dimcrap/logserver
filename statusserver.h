@@ -1,17 +1,24 @@
 #pragma once 
+
 #include <sys/socket.h>
 #include <iostream>
 #include <netinet/in.h>
+#include "stats.h"
+#include <memory>
+#include <optional>
+#include <functional>
 
 
 class statusserver{
     int http_socket;
+    std::optional<std::reference_wrapper<stats>> statsobject;
 
     public:
-        statusserver(){   
+        statusserver(stats &statsobj){   
+            statsobject=std::ref(statsobj);
         };
         
         int startserver();
-        void handleHttprequest();
+        void handleHttprequest(int clientsocket);
 
 };

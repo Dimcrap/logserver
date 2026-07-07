@@ -1,6 +1,7 @@
 #include "statusserver.h"
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 
 int statusserver::startserver(){
@@ -21,4 +22,28 @@ int statusserver::startserver(){
     listen(http_socket, 5);
 
     return 1;
+};
+
+
+
+void statusserver::handleHttprequest(int clientsocket){
+    char buffer[512];
+    read(clientsocket, buffer, sizeof(buffer)-1);
+    std::string request{buffer};
+
+    if(request.find("GET /stats")==0){
+        std::string json="{\n"
+        ""
+        ""
+        ""
+        "}\n";
+
+        
+        //write(int fd, const void *buf, size_t n)
+    }
+    //write(int fd, const void *buf, size_t n)
+    //request.find("GET /health")==0;
+
+    close(clientsocket);
+
 };

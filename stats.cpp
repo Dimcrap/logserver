@@ -1,4 +1,5 @@
 #include "stats.h"
+#include <string>
 
 
 
@@ -22,4 +23,14 @@ void stats::increase_dropped(){
 
 void stats::update_queue_size(size_t current){
     queue_high_water_mark=current;
+};
+
+
+std::string stats::getValue(std::string key){
+    return (key=="recievedmsgs")?std::to_string(messagesrecieved):
+    ("writtenmsgs")?std::to_string(messagewritten):
+    ("droppedmsgs")?std::to_string(messagedroppred):
+    ("highwatermarks")?std::to_string(queue_high_water_mark):
+    "ERRORS"+std::to_string( priority_count[0])+" WARNING:"+to_string(priority_count[1])+
+    " DEBUG"+std::to_string(priority_count[2])+" INFO:"+std::to_string(priority_count[3]);
 };

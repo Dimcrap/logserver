@@ -15,4 +15,5 @@ class stats{
     void increase_written(const std::string & priority);
     void increase_dropped();
     void update_queue_size(size_t current);
+    std::string getValue(std::string key);
 };
