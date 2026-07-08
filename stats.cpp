@@ -26,11 +26,18 @@ void stats::update_queue_size(size_t current){
 };
 
 
-std::string stats::getValue(std::string key){
-    return (key=="recievedmsgs")?std::to_string(messagesrecieved):
-    ("writtenmsgs")?std::to_string(messagewritten):
-    ("droppedmsgs")?std::to_string(messagedroppred):
-    ("highwatermarks")?std::to_string(queue_high_water_mark):
+std::string stats::getValue(char firstword){
+
+    if(firstword!='r' || firstword!='R' || firstword!='w' || firstword!='W'||firstword!='d' || 
+        firstword!='D'|| firstword!='h' || firstword!='H' || firstword != 'p' || firstword != 'P')
+        {
+        std::cerr<<"undefined value in getValue"<<std::endl;
+        }
+
+    return (firstword=='r' || firstword=='R')?std::to_string(messagesrecieved):
+    (firstword=='w' || firstword=='W')?std::to_string(messagewritten):
+    (firstword=='d' || firstword=='D')?std::to_string(messagedroppred):
+    (firstword=='h' || firstword=='H')?std::to_string(queue_high_water_mark):
     "ERRORS"+std::to_string( priority_count[0])+" WARNING:"+to_string(priority_count[1])+
     " DEBUG"+std::to_string(priority_count[2])+" INFO:"+std::to_string(priority_count[3]);
 };

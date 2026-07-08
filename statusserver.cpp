@@ -1,7 +1,10 @@
 #include "statusserver.h"
 #include <netinet/in.h>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <iostream>
+
 
 
 int statusserver::startserver(){
@@ -33,17 +36,32 @@ void statusserver::handleHttprequest(int clientsocket){
 
     if(request.find("GET /stats")==0){
         std::string json="{\n"
-        ""
-        ""
-        ""
+        "recived messages:"+statsobject.value().get().getValue('r')+
+        ",\nwriten messages:"+statsobject.value().get().getValue('w')+
+        ",\ndrpped messages:"+statsobject.value().get().getValue('d')+
+        ",\nqueue watermark:"+statsobject.value().get().getValue('p')+
+        ",\ndrpped messages:"+statsobject.value().get().getValue('d')+
         "}\n";
 
+        std::string response{
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: application/json/\r\n"
+        "Content-Length: "+ std::to_string(json.size())+ "\r\n"
+        "\r"+json};
         
-        //write(int fd, const void *buf, size_t n)
+        write(clientsocket, response.c_str(), response.size());
+    }else if(request.find("GET‌ /health")==0){
+        std::string response{
+            "HTTP/1.1 200 OK\r\n"
+            "Content-type: text/plain\r\n"
+            "\r\n"
+            "Ok\n"};
+        write(clientsocket, response.c_str(), response.size());
+    }else{
+        std::string response{"\n\rHTTP/1.1 404 Not found\r\n\r\n"};
+        write(clientsocket, response.c_str(), response.size());
     }
-    //write(int fd, const void *buf, size_t n)
-    //request.find("GET /health")==0;
-
+    
     close(clientsocket);
 
 };

@@ -3,6 +3,7 @@
 #include <array>
 #include <string>
 
+
 class stats{
     std::atomic<uint64_t> messagesrecieved{0};
     std::atomic<uint64_t> messagewritten{0};
@@ -15,5 +16,5 @@ class stats{
     void increase_written(const std::string & priority);
     void increase_dropped();
     void update_queue_size(size_t current);
-    std::string getValue(std::string key);
+    std::string getValue(char firstword);
 };
