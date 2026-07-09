@@ -13,7 +13,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include "stats.h"
-
+#include "statusserver.h"
 
 
 
@@ -39,10 +39,11 @@ class logsmanager{
         void rotate_all();
         std::chrono::seconds getinterval();  
         stats statsmanager;
-
-    private:
+        
+        private:
         threadpool thpool;
         std::atomic<bool> running;
+        statusserver server;
         
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;
@@ -54,6 +55,7 @@ class logsmanager{
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);
         void checkFiles();     
+        void handlestatusRequest(int client_socket);
 
         /*std::unordered_map<std::string,std::ofstream> files;
         std::ofstream &getfile(const std::string &name){

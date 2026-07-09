@@ -1,3 +1,5 @@
+#pragma once
+
 #include <atomic>
 #include <cstdint>
 #include <array>
@@ -5,6 +7,7 @@
 
 
 class stats{
+
     std::atomic<uint64_t> messagesrecieved{0};
     std::atomic<uint64_t> messagewritten{0};
     std::atomic<uint64_t> messagedroppred{0};
@@ -17,4 +20,5 @@ class stats{
     void increase_dropped();
     void update_queue_size(size_t current);
     std::string getValue(char firstword);
+
 };

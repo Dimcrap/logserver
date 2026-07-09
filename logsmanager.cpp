@@ -7,7 +7,8 @@
 #include <sys/stat.h>
 
 
-logsmanager::logsmanager():thpool(4){
+logsmanager::logsmanager():thpool(4),server(statsmanager)
+{
 
     struct stat sb;
 
@@ -24,9 +25,11 @@ logsmanager::logsmanager():thpool(4){
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-    thpool.dequeuedaction=[this](){    statsmanager.update_queue_size(thpool.getqueuecount());
+    
+    thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
 };
     
+
 }
 
 

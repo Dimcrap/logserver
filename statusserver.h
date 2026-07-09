@@ -19,6 +19,7 @@ class statusserver{
         };
         
         int startserver();
+        void listenserver();
         void handleHttprequest(int clientsocket);
-
+        
 };

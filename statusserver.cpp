@@ -65,3 +65,15 @@ void statusserver::handleHttprequest(int clientsocket){
     close(clientsocket);
 
 };
+
+
+void statusserver::listenserver(){
+
+    while(true){
+        char buffer[256];
+        //make socket address
+        //apply reciveing into byte
+        //check and process
+    }
+
+};
