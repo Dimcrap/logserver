@@ -69,11 +69,20 @@ void statusserver::handleHttprequest(int clientsocket){
 
 void statusserver::listenserver(){
 
+    char buffer[256];
+        sockaddr_in client_addr;
+        socklen_t client_addrlength=sizeof(client_addr);
+
     while(true){
-        char buffer[256];
-        //make socket address
-        //apply reciveing into byte
-        //check and process
+        
+        int clientsocket=accept(http_socket, nullptr, nullptr);
+        int bytes=recvfrom(http_socket, buffer, sizeof(buffer)-1,0,
+         (struct sockaddr *) & client_addr,&client_addrlength);
+     
+        if(bytes>0){
+            handleHttprequest(clientsocket);
+        }
+        close(http_socket);
     }
 
 };

@@ -7,6 +7,8 @@
 #include <memory>
 #include <optional>
 #include <functional>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 
 class statusserver{

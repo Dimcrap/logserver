@@ -1,4 +1,5 @@
 #include "logsmanager.h"
+#include "statusserver.h"
 #include <algorithm>
 #include <cstddef>
 #include <fstream>
@@ -17,6 +18,7 @@ logsmanager::logsmanager():thpool(4),server(statsmanager)
             std::cerr<<"there where no logs folder == logs folder creation failed\n";
         }
     }
+    statussererprocess=std::thread(&statusserver::listenserver,&server);
     
     
     WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
@@ -25,12 +27,14 @@ logsmanager::logsmanager():thpool(4),server(statsmanager)
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-    
+    statussererprocess.join();
     thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
+    
 };
     
 
 }
+
 
 
 void logsmanager::addlog(logmsg log){
@@ -90,6 +94,9 @@ logsmanager::~logsmanager(){
     fflush(DEBUG.get());
     fflush(INFO.get());
     
+     if(statussererprocess.joinable()){
+        statussererprocess.join();
+    }
 };
 
 
@@ -115,7 +122,7 @@ std::string  logsmanager::definefromconfig(std::string field){
     if(it==contents.end()) std::cerr<<"failed to define from configfile\n";
     
     long int indx{(it-contents.begin())+1};
-    std::cout<<"result for "<<field<<" in definefromconfig:"<<contents[indx]<<std::endl;
+    //std::cout<<"result for "<<field<<" in definefromconfig:"<<contents[indx]<<std::endl;
     
     
     /*if(field=="rotate_clock:" || field=="rotate_count:"){
