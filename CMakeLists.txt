@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #set(HEADERS)
 
-set(UDP_server_resources UDPserver.cpp threadpool.cpp logsmanager.cpp stats.cpp statusserver.cpp)
+set(UDP_server_resources UDPserver.cpp threadpool.cpp logsmanager.cpp stats.cpp statusmanager.cpp)
 set(UDP_client_resources UDPclient.cpp)
 set(UDP_repeater_resources lorem.c UDPrepeaterClient.cpp )  
 

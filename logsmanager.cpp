@@ -1,5 +1,4 @@
 #include "logsmanager.h"
-#include "statusserver.h"
 #include <algorithm>
 #include <cstddef>
 #include <fstream>
@@ -8,7 +7,7 @@
 #include <sys/stat.h>
 
 
-logsmanager::logsmanager():thpool(4),server(statsmanager)
+logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
 {
 
     struct stat sb;
@@ -18,8 +17,6 @@ logsmanager::logsmanager():thpool(4),server(statsmanager)
             std::cerr<<"there where no logs folder == logs folder creation failed\n";
         }
     }
-    statussererprocess=std::thread(&statusserver::listenserver,&server);
-    
     
     WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
@@ -27,14 +24,11 @@ logsmanager::logsmanager():thpool(4),server(statsmanager)
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-    statussererprocess.join();
     thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
-    
+
 };
     
-
 }
-
 
 
 void logsmanager::addlog(logmsg log){
@@ -151,7 +145,7 @@ if(!sourcefile.is_open()){
         if(start !=std::string::npos){
             end=(content.find_first_of("\n\v\t\r\f", start));
             if(end!=std::string::npos){
-                std::cout<<"replacing text:"<<value<<std::endl;
+                //std::cout<<"replacing text:"<<value<<std::endl;
                 content.replace(start, end-start, value);
                 std::ofstream outfile("../config.txt");
                 outfile<<content;

@@ -1,13 +1,15 @@
-#include "statusserver.h"
+#include "statusmanager.h"
+#include <chrono>
 #include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
+#include <thread>
 #include <unistd.h>
 #include <iostream>
 
 
 
-int statusserver::startserver(){
+int statusmanager::startserver(){
     http_socket=socket(AF_INET, SOCK_STREAM, 0);
     if(http_socket<0){
         std::cerr<<"failed to build socket for server \n";
@@ -29,7 +31,7 @@ int statusserver::startserver(){
 
 
 
-void statusserver::handleHttprequest(int clientsocket){
+void statusmanager::handleHttprequest(int clientsocket){
     char buffer[512];
     read(clientsocket, buffer, sizeof(buffer)-1);
     std::string request{buffer};
@@ -67,13 +69,15 @@ void statusserver::handleHttprequest(int clientsocket){
 };
 
 
-void statusserver::listenserver(){
+void statusmanager::listenserver(){
 
+    
     char buffer[256];
         sockaddr_in client_addr;
         socklen_t client_addrlength=sizeof(client_addr);
 
-    while(true){
+    while(running){
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
         
         int clientsocket=accept(http_socket, nullptr, nullptr);
         int bytes=recvfrom(http_socket, buffer, sizeof(buffer)-1,0,

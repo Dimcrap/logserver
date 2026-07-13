@@ -13,7 +13,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include "stats.h"
-#include "statusserver.h"
+#include "statusmanager.h"
 
 
 
@@ -43,8 +43,8 @@ class logsmanager{
         private:
         threadpool thpool;
         std::atomic<bool> running;
-        statusserver server;
-        std::thread statussererprocess;
+        statusmanager stmanager;
+        std::thread statussererprocess=std::thread(&statusmanager::listenserver,&stmanager);
 
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;

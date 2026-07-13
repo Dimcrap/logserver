@@ -9,19 +9,24 @@
 #include <functional>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <chrono>
 
 
-class statusserver{
+
+class statusmanager{
     int http_socket;
     std::optional<std::reference_wrapper<stats>> statsobject;
+    bool running{false};
 
     public:
-        statusserver(stats &statsobj){   
+        statusmanager(stats &statsobj):running(true){   
             statsobject=std::ref(statsobj);
         };
-        
+        ~statusmanager(){
+            running=false;
+        }
+
         int startserver();
         void listenserver();
         void handleHttprequest(int clientsocket);
-        
 };
