@@ -44,7 +44,7 @@ class logsmanager{
         threadpool thpool;
         std::atomic<bool> running;
         statusmanager stmanager;
-        std::thread statussererprocess=std::thread(&statusmanager::listenserver,&stmanager);
+        std::thread statussererprocess;
 
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;

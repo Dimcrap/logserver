@@ -24,6 +24,7 @@ class statusmanager{
         };
         ~statusmanager(){
             running=false;
+            close(http_socket);
         }
 
         int startserver();

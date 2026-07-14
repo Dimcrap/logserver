@@ -1,5 +1,7 @@
 #include "statusmanager.h"
 #include <chrono>
+#include <cstdio>
+#include <cstring>
 #include <netinet/in.h>
 #include <string>
 #include <sys/socket.h>
@@ -15,15 +17,19 @@ int statusmanager::startserver(){
         std::cerr<<"failed to build socket for server \n";
         return 0;
     }
+    int opt=1;
+    setsockopt(http_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
     sockaddr_in addr{};
     addr.sin_family=AF_INET;
     addr.sin_port =htons(8889);
     addr.sin_addr.s_addr =INADDR_ANY;
-
+    
     if(bind(http_socket,(sockaddr *)&addr,sizeof(addr))<0){
         std::cout<<"could not bind the socket with  socket address \n";
-        return 0;
+        return -1;
     };
+
     listen(http_socket, 5);
 
     return 1;
@@ -64,29 +70,29 @@ void statusmanager::handleHttprequest(int clientsocket){
         write(clientsocket, response.c_str(), response.size());
     }
     
-    close(clientsocket);
 
 };
 
 
 void statusmanager::listenserver(){
 
+    std::cout<<"\nhttp servser listening on port:8889 . . .\n";
     
-    char buffer[256];
-        sockaddr_in client_addr;
-        socklen_t client_addrlength=sizeof(client_addr);
-
+    
     while(running){
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        
         int clientsocket=accept(http_socket, nullptr, nullptr);
-        int bytes=recvfrom(http_socket, buffer, sizeof(buffer)-1,0,
-         (struct sockaddr *) & client_addr,&client_addrlength);
-     
-        if(bytes>0){
-            handleHttprequest(clientsocket);
-        }
-        close(http_socket);
-    }
 
+        if(clientsocket<0 ){
+         if(!running)break;
+         continue;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        //std::cout<<"from while loop \n";
+        handleHttprequest(clientsocket);
+        
+        close(clientsocket);
+
+    }
+    
 };
