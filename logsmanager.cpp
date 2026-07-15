@@ -11,6 +11,7 @@ logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
 {
 
     struct stat sb;
+    stmanager.startserver();
 
     if(stat("../logs",&sb)!=0){
         if(mkdir("../logs",0700)!=0){
@@ -24,8 +25,8 @@ logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-    //td::thread statussererprocess=std::thread(&statusmanager::listenserver,&stmanager);
-    stmanager.listenserver();
+     statussererprocess=std::thread(&statusmanager::listenserver,&stmanager);
+    
     thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
 
 };

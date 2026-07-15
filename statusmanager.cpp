@@ -32,6 +32,7 @@ int statusmanager::startserver(){
 
     listen(http_socket, 5);
 
+    //std::cout<<"all configurations completed in statsmanager"<<std::endl;
     return 1;
 };
 
@@ -39,34 +40,46 @@ int statusmanager::startserver(){
 
 void statusmanager::handleHttprequest(int clientsocket){
     char buffer[512];
-    read(clientsocket, buffer, sizeof(buffer)-1);
+    int byte=read(clientsocket, buffer, sizeof(buffer)-1);
+    if(byte <= 0) return;
+    buffer[byte]='\0';
+    
     std::string request{buffer};
 
+    std::cout<<"request: "<<request<<std::endl;
+    
+
     if(request.find("GET /stats")==0){
-        std::string json="{\n"
-        "recived messages:"+statsobject.value().get().getValue('r')+
-        ",\nwriten messages:"+statsobject.value().get().getValue('w')+
-        ",\ndrpped messages:"+statsobject.value().get().getValue('d')+
-        ",\nqueue watermark:"+statsobject.value().get().getValue('p')+
-        ",\ndrpped messages:"+statsobject.value().get().getValue('d')+
+        std::string json=
+        "{\n"
+        " \"recived messages:\" "+statsobject.value().get().getValue('r')+",\n" 
+        " \"writen messages:\" "+statsobject.value().get().getValue('w')+",\n"
+        " \"drpped messages:\" "+statsobject.value().get().getValue('d')+",\n"
+        " \"queue watermark:\" "+statsobject.value().get().getValue('p')+",\n"
+        " \"drpped messages:\" "+statsobject.value().get().getValue('d')+"\n"
         "}\n";
 
         std::string response{
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: application/json/\r\n"
         "Content-Length: "+ std::to_string(json.size())+ "\r\n"
-        "\r"+json};
+        "\r\n"
+        +json};
         
         write(clientsocket, response.c_str(), response.size());
-    }else if(request.find("GET‌ /health")==0){
+    }else if(request.find("GET /health")==0){
         std::string response{
             "HTTP/1.1 200 OK\r\n"
-            "Content-type: text/plain\r\n"
+            "Content-Type: text/plain\r\n"
             "\r\n"
-            "Ok\n"};
+            "ok\n"};
         write(clientsocket, response.c_str(), response.size());
     }else{
-        std::string response{"\n\rHTTP/1.1 404 Not found\r\n\r\n"};
+        //std::string response{"HTTP/1.1 404 Not Found\r\n\r\n"};
+        std::string response{"HTTP/1.1 404 Not Found\r\n"
+            "Content-Type: text/plain\r\n"
+            "\r\n"
+            "404 Not Found\n"};
         write(clientsocket, response.c_str(), response.size());
     }
     

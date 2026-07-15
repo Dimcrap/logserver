@@ -1,6 +1,6 @@
-warn_log: ../logs/warn_09-13_03:09:20.log
-error_log: ../logs/error_09-13_03:09:20.log
-debug_log: ../logs/debug_09-13_03:09:20.log
-info_log: ../logs/info_09-13_03:09:20.log
+warn_log: ../logs/warn_45-15_10:45:52.log
+error_log: ../logs/error_45-15_10:45:52.log
+debug_log: ../logs/debug_45-15_10:45:52.log
+info_log: ../logs/info_45-15_10:45:52.log
 rotate_clock: minute
-rotate_count: 1
+rotate_count: 5
