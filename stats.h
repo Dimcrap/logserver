@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 
+
 class stats{
 
     std::atomic<uint64_t> messagesrecieved{0};
@@ -13,7 +14,7 @@ class stats{
     std::atomic<uint64_t> messagedroppred{0};
     std::atomic<uint64_t>queue_high_water_mark{0};
     //errors_encountred 
-    std::array<std::atomic<uint64_t>,4> priority_count;  
+    std::array<std::atomic<uint64_t>,4> priority_count{};  
     public:
     void increase_recieved();
     void increase_written(const std::string & priority);

@@ -46,7 +46,7 @@ void statusmanager::handleHttprequest(int clientsocket){
     
     std::string request{buffer};
 
-    std::cout<<"request: "<<request<<std::endl;
+    //std::cout<<"request: "<<request<<std::endl;
     
 
     if(request.find("GET /stats")==0){

@@ -17,7 +17,7 @@ class threadpool{
         std::mutex queue_mutex;
         std::condition_variable my_cv;
         std::atomic<bool> stop{false};
-
+        int threshold{8};
 
     public:
 
@@ -25,6 +25,7 @@ class threadpool{
         ~threadpool();
         void enqueue(std::function<void()> task);
         size_t getqueuecount(){return tasks.size();};
+        void dropqueuetask(){tasks.pop();};
         std::function<void()> dequeuedaction;
 
 };

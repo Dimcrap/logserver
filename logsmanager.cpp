@@ -25,7 +25,7 @@ logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-     statussererprocess=std::thread(&statusmanager::listenserver,&stmanager);
+    statusserverprocess=std::thread(&statusmanager::listenserver,&stmanager);
     
     thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
 
@@ -45,7 +45,7 @@ void logsmanager::addlog(logmsg log){
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
             log.msgbody+"\n"};
 
-                std::cout<<"full message is  created"<<std::endl;
+            
             std::lock_guard<std::mutex> lock(INFO_mutex);
             
             fputs(fullmsg.c_str(),INFO.get());
@@ -62,7 +62,7 @@ void logsmanager::addlog(logmsg log){
         }else if(log.priority=="DEBUG"){
             std::lock_guard<std::mutex> lock(DEBUG_mutex);
 
-             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
             log.msgbody+"\n"};
 
@@ -91,8 +91,8 @@ logsmanager::~logsmanager(){
     fflush(DEBUG.get());
     fflush(INFO.get());
     
-     if(statussererprocess.joinable()){
-        statussererprocess.join();
+     if(statusserverprocess.joinable()){
+        statusserverprocess.join();
     }
 };
 

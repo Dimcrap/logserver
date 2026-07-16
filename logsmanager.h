@@ -44,7 +44,7 @@ class logsmanager{
         threadpool thpool;
         std::atomic<bool> running;
         statusmanager stmanager;
-        std::thread statussererprocess;
+        std::thread statusserverprocess;
 
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;
@@ -62,7 +62,7 @@ class logsmanager{
         std::ofstream &getfile(const std::string &name){
             return files.at(name);
         };*/
-
+        
 
 };
 
