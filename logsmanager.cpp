@@ -1,15 +1,22 @@
 #include "logsmanager.h"
 #include <algorithm>
+#include <cerrno>
 #include <cstddef>
+#include <cstdio>
 #include <fstream>
+#include <memory>
 #include <mutex>
 #include <sstream>
 #include <sys/stat.h>
+#include <fcntl.h>
+
+
 
 
 logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
 {
 
+    std::shared_ptr<FILE> testptr;
     struct stat sb;
     stmanager.startserver();
 
@@ -19,11 +26,50 @@ logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
         }
     }
     
-    WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
-    ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
-    DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
-    INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),[](FILE * F){if(F) fclose(F);});
+    WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),
+    [](FILE * F){if(F) fclose(F);});
+   // ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),
+   // [](FILE * F){if(F) fclose(F);});"../logs/error_34-17_00:34:27.log","a"
+     ERROR.reset(fopen("../logs/error_34-17_00:34:27.log","a"),
+    [](FILE * F){if(F) fclose(F);}); 
+    
+    DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),
+    [](FILE * F){if(F) fclose(F);});
+    INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),
+    [](FILE * F){if(F) fclose(F);});
     checkFiles();
+
+
+
+    std::cout<<"pointer befores reseting"<<testptr.get()<<std::endl;
+    //FILE * tstfile;
+    //tstfile=fopen("../logs/test.log", "a");
+    int fd = open("/home/mamadreza/programming/projects/logserver/logs/debug_34-17_00:34:27.log",
+         O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd >= 0) {
+        testptr.reset(fdopen(fd,"a"),[](FILE * F){if(F) fclose(F);});
+    }
+    std::cout<<"ptr after reseting"<<testptr.get()<<std::endl;
+    std::cout<<"ptr use count "<<testptr.use_count()<<std::endl;
+
+    if(!testptr.get())std::cout<<"test.log did not opened\n";
+    //fprintf(tstfile, "some txt");
+    //fclose(tstfile);
+    int result=fputs("sharedpointer cook somehting22\n", testptr.get());
+    if( result ==EOF){
+        std::cout<<"fputs failed !ERROR : "<<strerror(errno)<<std::endl;
+       // std::cout<<"errno:"<< errno <‌<std::endl;
+    }
+    setbuf(testptr.get(), NULL); 
+    fflush(testptr.get());
+    
+    FILE* raw = testptr.get();
+    std::cout << "FILE* = " << raw << std::endl;
+    std::cout << "ferror = " << ferror(raw) << std::endl;
+    std::cout << "fileno = " << fileno(raw) << std::endl;  
+
+
+    fputs("cook\n", ERROR.get());
 
     statusserverprocess=std::thread(&statusmanager::listenserver,&stmanager);
     
@@ -38,7 +84,8 @@ void logsmanager::addlog(logmsg log){
     statsmanager.increase_recieved();
 
     thpool.enqueue([this,log](){
-        
+
+
         if(log.priority=="INFO"){
 
             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
@@ -69,18 +116,24 @@ void logsmanager::addlog(logmsg log){
             fputs(fullmsg.c_str(),DEBUG.get());
 
         }else{
+            std::cout<<"wrting to error log\n";
+
             std::lock_guard<std::mutex> lock(ERROR_mutex);
 
-             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
+            std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
             std::to_string(log.logsport)+"-"+"priority"+log.priority+" message"": "+
             log.msgbody+"\n"};
 
             fputs(fullmsg.c_str(),ERROR.get());
+
         }
         
         statsmanager.increase_written(log.priority);
-    });
-    statsmanager.update_queue_size(thpool.getqueuecount());
+    });/*
+    if(thpool.getqueuecount()>threshold){
+        thpool.dropqueuetask();
+    }*/
+    //statsmanager.update_queue_size(thpool.getqueuecount());
 };
 
 
@@ -111,7 +164,7 @@ std::string  logsmanager::definefromconfig(std::string field){
         contents.push_back(word);
     }
    
-    auto comp=[field](std::string element){
+    auto comp=[ field](std::string element){
         return field==element;
     };
 

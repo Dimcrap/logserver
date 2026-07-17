@@ -1,14 +1,16 @@
+#include <cstddef>
 #include <string>
 #include <chrono>
+#include <iostream>
 #include <fstream>
 #include <cstring>
-#include <iostream>
 #include <mutex>
 #include "threadpool.h"
 #include <memory>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctime>
+#include <cstring>
 #include <atomic>
 #include <sstream>
 #include <sys/stat.h>
@@ -41,17 +43,21 @@ class logsmanager{
         stats statsmanager;
         
         private:
+        int threshold{8};
         threadpool thpool;
         std::atomic<bool> running;
         statusmanager stmanager;
         std::thread statusserverprocess;
+
 
         std::mutex WARN_mutex,INFO_mutex,ERROR_mutex,DEBUG_mutex,cfgfilemutex;
         std::shared_ptr<FILE> WARN;
         std::shared_ptr<FILE> ERROR;
         std::shared_ptr<FILE> DEBUG;
         std::shared_ptr<FILE> INFO;
-    
+        
+
+
         std::string definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
         std::string createlogname(std::string category);

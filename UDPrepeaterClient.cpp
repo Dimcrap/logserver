@@ -33,6 +33,7 @@ int main(int argc,char * argv[]){
 
     if (argc!=2){
         std::cout<<"invalid argument count!\n"<<argv[0]<<" \'count of messages\' \n";
+        return 0;
     }
     
     int msgcount{1};

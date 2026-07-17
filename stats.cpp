@@ -10,7 +10,7 @@ void stats::increase_recieved(){
 
 
 void stats::increase_written(const std::string & priority){
-    std::cout<<"increase written called"<<std::endl;
+
     messagewritten+=1;
     int indx{(priority=="ERROR")?0:(priority=="WARN")?1:priority=="INFO"?2:3};
     priority_count[indx]+=1;
