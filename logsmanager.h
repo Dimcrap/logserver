@@ -55,8 +55,6 @@ class logsmanager{
         std::shared_ptr<FILE> ERROR;
         std::shared_ptr<FILE> DEBUG;
         std::shared_ptr<FILE> INFO;
-        
-
 
         std::string definefromconfig(std::string field);
         void editconfig(std::string field ,std::string value);
@@ -69,6 +67,5 @@ class logsmanager{
             return files.at(name);
         };*/
         
-
 };
 

@@ -36,8 +36,8 @@ std::string stats::getValue(char firstword){
         return "";
         }
 
-        std::cout<<"contents of priority count:"<<priority_count[0]<<" "<<
-        priority_count[1]<<" "<<priority_count[2]<<" "<<priority_count[3]<<std::endl;
+        //std::cout<<"contents of priority count:"<<priority_count[0]<<" "<<
+        //priority_count[1]<<" "<<priority_count[2]<<" "<<priority_count[3]<<std::endl;
         
     return (firstword=='r' || firstword=='R')?std::to_string(messagesrecieved):
     (firstword=='w' || firstword=='W')?std::to_string(messagewritten):

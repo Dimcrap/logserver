@@ -16,7 +16,6 @@
 logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
 {
 
-    std::shared_ptr<FILE> testptr;
     struct stat sb;
     stmanager.startserver();
 
@@ -28,52 +27,18 @@ logsmanager::logsmanager():thpool(4),stmanager(statsmanager)
     
     WARN.reset(fopen(definefromconfig("warn_log:").c_str(),"a"),
     [](FILE * F){if(F) fclose(F);});
-   // ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),
-   // [](FILE * F){if(F) fclose(F);});"../logs/error_34-17_00:34:27.log","a"
-     ERROR.reset(fopen("../logs/error_34-17_00:34:27.log","a"),
-    [](FILE * F){if(F) fclose(F);}); 
-    
+    ERROR.reset(fopen(definefromconfig("error_log:").c_str(),"a"),
+    [](FILE * F){if(F) fclose(F);});//"../logs/error_34-17_00:34:27.log","a"
     DEBUG.reset(fopen(definefromconfig("debug_log:").c_str(),"a"),
     [](FILE * F){if(F) fclose(F);});
     INFO.reset(fopen(definefromconfig("info_log:").c_str(),"a"),
     [](FILE * F){if(F) fclose(F);});
     checkFiles();
 
-
-
-    std::cout<<"pointer befores reseting"<<testptr.get()<<std::endl;
-    //FILE * tstfile;
-    //tstfile=fopen("../logs/test.log", "a");
-    int fd = open("/home/mamadreza/programming/projects/logserver/logs/debug_34-17_00:34:27.log",
-         O_WRONLY | O_CREAT | O_APPEND, 0644);
-    if (fd >= 0) {
-        testptr.reset(fdopen(fd,"a"),[](FILE * F){if(F) fclose(F);});
-    }
-    std::cout<<"ptr after reseting"<<testptr.get()<<std::endl;
-    std::cout<<"ptr use count "<<testptr.use_count()<<std::endl;
-
-    if(!testptr.get())std::cout<<"test.log did not opened\n";
-    //fprintf(tstfile, "some txt");
-    //fclose(tstfile);
-    int result=fputs("sharedpointer cook somehting22\n", testptr.get());
-    if( result ==EOF){
-        std::cout<<"fputs failed !ERROR : "<<strerror(errno)<<std::endl;
-       // std::cout<<"errno:"<< errno <‌<std::endl;
-    }
-    setbuf(testptr.get(), NULL); 
-    fflush(testptr.get());
-    
-    FILE* raw = testptr.get();
-    std::cout << "FILE* = " << raw << std::endl;
-    std::cout << "ferror = " << ferror(raw) << std::endl;
-    std::cout << "fileno = " << fileno(raw) << std::endl;  
-
-
-    fputs("cook\n", ERROR.get());
-
     statusserverprocess=std::thread(&statusmanager::listenserver,&stmanager);
     
-    thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(thpool.getqueuecount());
+    thpool.dequeuedaction=[this](){ statsmanager.update_queue_size(
+        thpool.getqueuecount());
 
 };
     
@@ -84,8 +49,6 @@ void logsmanager::addlog(logmsg log){
     statsmanager.increase_recieved();
 
     thpool.enqueue([this,log](){
-
-
         if(log.priority=="INFO"){
 
             std::string fullmsg{"["+std::string(log.timestamp)+"] from"+log.address+":"+
@@ -96,7 +59,7 @@ void logsmanager::addlog(logmsg log){
             std::lock_guard<std::mutex> lock(INFO_mutex);
             
             fputs(fullmsg.c_str(),INFO.get());
-        
+            fflush(INFO.get());
         }else if(log.priority=="WARN"){
             std::lock_guard<std::mutex> lock(WARN_mutex);
 
@@ -105,7 +68,7 @@ void logsmanager::addlog(logmsg log){
             log.msgbody+"\n"};
 
             fputs(fullmsg.c_str(),WARN.get());
-
+            fflush(WARN.get());
         }else if(log.priority=="DEBUG"){
             std::lock_guard<std::mutex> lock(DEBUG_mutex);
 
@@ -114,7 +77,7 @@ void logsmanager::addlog(logmsg log){
             log.msgbody+"\n"};
 
             fputs(fullmsg.c_str(),DEBUG.get());
-
+            fflush(DEBUG.get());
         }else{
             std::cout<<"wrting to error log\n";
 
@@ -125,15 +88,15 @@ void logsmanager::addlog(logmsg log){
             log.msgbody+"\n"};
 
             fputs(fullmsg.c_str(),ERROR.get());
-
+            fflush(ERROR.get());
         }
         
         statsmanager.increase_written(log.priority);
-    });/*
+    });
     if(thpool.getqueuecount()>threshold){
         thpool.dropqueuetask();
-    }*/
-    //statsmanager.update_queue_size(thpool.getqueuecount());
+    }
+    statsmanager.update_queue_size(thpool.getqueuecount());
 };
 
 
@@ -205,7 +168,7 @@ if(!sourcefile.is_open()){
                 content.replace(start, end-start, value);
                 std::ofstream outfile("../config.txt");
                 outfile<<content;
-                 }else{
+                }else{
                     std::cerr<<"undefined value for field in line\n";
                 }
         }else{
